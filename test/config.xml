@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<config>
+    <fields>
+        <field name="adddate" type="integer" store="true" index="false"/>
+        <field name="address" type="string" store="true" index="true" analyzer="bigram"/>
+        <field name="altname" type="string" store="true" index="true" analyzer="bigram"/>
+        <field name="avg_price" type="float" store="true" index="false"/>
+        <field name="branchname" type="string" store="true" index="true" analyzer="bigram"/>
+        <field name="branchtotal" type="integer" byte="2" store="true" index="false"/>
+        <field name="card" type="string" store="true" index="false"/>
+        <field name="categories" type="integer" byte="4" multi="true" store="true" index="true"/>
+        <field name="categorynames" type="string" store="true" index="true" analyzer="bigram"/>
+        <field name="cityid" type="integer" store="true" index="true"/>
+        <field name="crossroad" type="string" store="true" index="true" analyzer="bigram"/>
+        <field name="dealgroupid" type="integer" multi="true" store="true" index="true"/>
+        <field name="dealgrouptitle" type="string" store="true" index="false"/>
+        <field name="defaultpic" type="string" store="true" index="false"/>
+        <field name="defaultvotetotal" type="integer" byte="4" store="true" index="false"/>
+        <field name="discount" type="string" store="true" index="true" analyzer="bigram"/>
+        <field name="discountids" type="integer" byte="4" multi="true" store="true" index="true"/>
+        <field name="dishtags" type="string" store="true" index="true" analyzer="bigram"/>
+        <field name="district" type="integer" byte="4" multi="true" store="true" index="true"/>
+        <field name="districtname" type="string" store="true" index="true" analyzer="bigram"/>
+        <field name="gloc" type="geolocation" store="true" index="false"/>
+        <field name="goloc" type="geolocation" store="true" index="false"/>
+        <field name="hasgroup" type="integer" byte="1" store="true" index="false"/>
+        <field name="hits" type="integer" byte="4" store="true" index="false"/>
+        <field name="hotelstar" type="integer" byte="1" store="true" index="false"/>
+        <field name="monthlyhits" type="integer" byte="4" store="true" index="false"/>
+        <field name="phonenos" type="string" store="true" index="true" analyzer="bigram"/>
+        <field name="pictotal" type="integer" byte="4" store="true" index="false"/>
+        <field name="poi" type="geolocation" store="true" index="false"/>
+        <field name="poipopularity" type="integer" byte="4" store="true" index="false"/>
+        <field name="popularity" type="integer" byte="4" store="true" index="false"/>
+        <field name="power" type="integer" byte="1" store="true" index="false"/>
+        <field name="pricelevel" type="integer" byte="1" store="true" index="false"/>
+        <field name="primarytag" type="string" store="true" index="false"/>
+        <field name="promoid" type="integer" multi="true" store="true" index="true"/>
+        <field name="promotitle" type="string" store="true" index="false"/>
+        <field name="regionnames" type="string" store="true" index="true" analyzer="bigram"/>
+        <field name="regions" type="integer" byte="4" multi="true" store="true" index="true"/>
+        <field name="score" type="integer" byte="1" store="true" index="false"/>
+        <field name="score1" type="integer" byte="1" store="true" index="false"/>
+        <field name="score2" type="integer" byte="1" store="true" index="false"/>
+        <field name="score3" type="integer" byte="1" store="true" index="false"/>
+        <field name="score4" type="integer" byte="1" store="true" index="false"/>
+        <field name="searchkeyword" type="string" store="false" index="true" namespace="-" analyzer="bigram"/>
+        <field name="shopgroupid" type="integer" store="true" index="true"/>
+        <field name="shopname" type="string" store="true" index="true" analyzer="bigram"/>
+        <field name="shoppower" type="integer" byte="1" store="true" index="false"/>
+        <field name="shopprice" type="integer" byte="4" store="true" index="false"/>
+        <field name="shoptags" type="string" store="true" index="true" analyzer="bigram"/>
+        <field name="shoptagids" type="integer" byte="4" multi="true" store="true" index="true"/>
+        <field name="shoptype" type="integer" byte="4" store="true" index="false"/>
+        <field name="smspromoid" type="integer" byte="1" store="true" index="false"/>
+        <field name="tablecount" type="integer" byte="2" store="true" index="false"/>
+        <field name="tags" type="string" store="false" index="true" analyzer="token"/>
+        <field name="votetotal" type="integer" byte="4" store="true" index="false"/>
+        <field name="weddingshop" type="string" store="true" index="true" analyzer="bigram"/>
+        <field name="wishtotal" type="integer" byte="4" store="true" index="false"/>
+    </fields>
+</config>

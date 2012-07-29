@@ -1,0 +1,37 @@
+cmake_minimum_required(VERSION 2.8)
+project(Argos)
+set_property(GLOBAL PROPERTY COMPILE_FLAGS "-m64")
+set_property(GLOBAL PROPERTY LINK_FLAGS "-m64")
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMakeModules)
+
+find_package(Boost 1.50.0 COMPONENTS system filesystem thread program_options regex REQUIRED)
+find_package(ICU 4.8 REQUIRED)
+
+INCLUDE_DIRECTORIES(
+    ${Boost_INCLUDE_DIRS}
+    ${ICU_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/include
+    .
+)
+
+SET(LIBS_MISC)
+LIST(APPEND LIBS_MISC ${Boost_LIBRARIES})
+LIST(APPEND LIBS_MISC ${ICU_LIBRARIES})
+
+ADD_SUBDIRECTORY(json_spirit)
+ADD_SUBDIRECTORY(pugixml)
+ADD_SUBDIRECTORY(common)
+ADD_SUBDIRECTORY(index)
+ADD_SUBDIRECTORY(query)
+ADD_SUBDIRECTORY(parser)
+ADD_SUBDIRECTORY(argos_ri_backend)
+ADD_SUBDIRECTORY(serialization)
+ADD_SUBDIRECTORY(net)
+ADD_SUBDIRECTORY(analyzer)
+ADD_SUBDIRECTORY(indexer)
+ADD_SUBDIRECTORY(searcher)
+
+

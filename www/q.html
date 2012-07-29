@@ -1,0 +1,78 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <script language="javascript">
+            function loadidx() {
+                var xmlhttp = new XMLHttpRequest();
+                xmlhttp.open("GET", "/indices.xml", false);
+                xmlhttp.send();
+                var ret=xmlhttp.responseXML;
+                var indices=ret.getElementsByTagName("index");
+                for(i=0; i<indices.length; i++ ) {
+                    var idxname=indices.item(i).attributes.getNamedItem("name").value;
+                    var elOptNew = document.createElement('option');
+                    elOptNew.text = idxname;
+                    elOptNew.value = idxname;
+                    document.getElementById("idxsel").add(elOptNew, null);
+                }
+            }
+            function selidx(obj) {
+                document.forms[0].action="/"+obj.options[obj.selectedIndex].value+"/query";
+            }
+        </script>
+		<title>Query Test</title>
+	</head>
+	<body onLoad="javascript:loadidx();">
+		<form method="get" action="/query" target="result">
+			<table>
+				<tr>
+					<td><label>Index</label></td>
+					<td>
+                        <select id="idxsel" onchange="javascript:selidx(this);" />
+                    </td>
+				</tr>
+				<tr>
+					<td><label>Match</label></td>
+					<td><input type="text" spellcheck="false" size="150" name="m" value="*" /></td>
+				</tr>
+				<tr>
+					<td><label>Filter</label></td>
+					<td><input type="text" spellcheck="false" size="150" name="f" value="1" /></td>
+				</tr>
+				<tr>
+					<td><label>Sort</label></td>
+					<td><input type="text" spellcheck="false" size="150" name="s" value="_id,ASC" /></td>
+				</tr>
+				<tr>
+					<td><label>Number of Results</label></td>
+					<td><input type="text" spellcheck="false" size="150" name="nr" value="15" /></td>
+				</tr>
+				<tr>
+					<td><label>Number to Skip</label></td>
+					<td><input type="text" spellcheck="false" size="150" name="sk" value="0" /></td>
+				</tr>
+				<tr>
+					<td><label>Returned Fields</label></td>
+					<td><input type="text" spellcheck="false" size="150" name="fl" value="*" /></td>
+				</tr>
+				<tr>
+					<td><label>Histograms</label></td>
+					<td><input type="text" spellcheck="false" size="150" name="h" value="" /></td>
+				</tr>
+				<tr>
+					<td><label>Format</label></td>
+					<td>
+                        <select name="fmt">
+                            <option value="xml" selected="true">XML</option>
+                            <option value="jsonm">JSON Map</option>
+                            <option value="jsona">JSON Array</option>
+                        </select>
+                    </td>
+				</tr>
+				<tr>
+					<td><input type="submit" /></td>
+				</tr>
+			</table>
+		</form>
+	</body>
+</html>
