@@ -9,6 +9,7 @@ Pre-requests
 * [Boost](www.boost.org), version 1.50.0 or higher
 * [CMake](www.cmake.org), version 2.8 or higher
 * [ICU](icu-project.org), version 4.8 or higher
+* [Log4cplus](log4cplus.sf.net), version 1.0.4.1
 
 Installation
 ------------
