@@ -21,6 +21,7 @@ namespace http {
         /// A request received from a client.
         struct request
         {
+            std::string peer;
             std::string method;
             std::string uri;
             int http_version_major;

@@ -73,14 +73,14 @@ namespace http {
             }
             catch(argos::argos_logic_error &e) {
                 rep=reply::stock_reply(reply::bad_request);
-                LOG4CPLUS_ERROR(err, rep.status << " - " << req.uri);
+                LOG4CPLUS_ERROR(err, "CLIENT:" << req.peer << ", CODE:" << rep.status << " - " << req.uri);
             }
             catch(...) {
                 rep=reply::stock_reply(reply::internal_server_error);
-                LOG4CPLUS_ERROR(err, rep.status << " - " << req.uri);
+                LOG4CPLUS_ERROR(err, "CLIENT:" << req.peer << ", CODE:" << rep.status << " - " << req.uri);
             }
 
-            LOG4CPLUS_INFO(acc, "CODE:" << rep.status << ", TIME:" << t*1000 << "ms, MEM:" << mc << ", CL:" << rep.content.size() << ", QID:[" << q.query_id_ << "], URL:" << req.uri);
+            LOG4CPLUS_INFO(acc, "CLIENT:" << req.peer << ", CODE:" << rep.status << ", TIME:" << t*1000 << "ms, MEM:" << mc << ", CL:" << rep.content.size() << ", QID:[" << q.query_id_ << "], URL:" << req.uri);
             
             // TODO: Set a meaningful threshold
             if (ctx.temp_pool->get_used_size()>3*1024*1024) {

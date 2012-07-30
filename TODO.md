@@ -9,8 +9,6 @@ Features still missing
 -----------------------
 * Refine serialization
     + Memory usage of serialization is way too suboptimal, JSON serialization uses json_spirit which needs more attention.
-* Logging
-    + Need a full-functional logging module, looking for candidates with minimal dependancies, so far [Boost.log](boost-log.sourceforge.net) and [Pantheios](www.pantheios.org) look good, still need more evaluation.
 * Partial update
     Non-indexed fields can be partially updated, which allows update message contains only fields needed.
 * Histogram

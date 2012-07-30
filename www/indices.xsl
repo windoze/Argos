@@ -27,7 +27,6 @@ th.field, td.field { border: 1px #000 solid; padding: 3 }
             <th class="field">Config</th>
         </tr>
         <xsl:for-each select="index">
-            <xsl:variable name="idxname" select="@name" />
             <xsl:choose>
                 <xsl:when test="position() mod 2 = 0">
                     <tr class="field" bgcolor="#f0f0f0">
@@ -35,7 +34,7 @@ th.field, td.field { border: 1px #000 solid; padding: 3 }
                         <td class="field"><xsl:value-of select="@path"/></td>
                         <td class="field"><xsl:value-of select="@active"/></td>
                         <td class="field"><xsl:value-of select="@erased"/></td>
-                        <td class="field"><a href="/{$idxname}/config.xml">config.xml</a></td>
+                        <td class="field"><a href="/{@name}/config.xml">config.xml</a></td>
                     </tr>
                 </xsl:when>
                 <xsl:when test="position() mod 2 = 1">
@@ -44,7 +43,7 @@ th.field, td.field { border: 1px #000 solid; padding: 3 }
                         <td class="field"><xsl:value-of select="@path"/></td>
                         <td class="field"><xsl:value-of select="@active"/></td>
                         <td class="field"><xsl:value-of select="@erased"/></td>
-                        <td class="field"><a href="/{$idxname}/config.xml">config.xml</a></td>
+                        <td class="field"><a href="/{@name}/config.xml">config.xml</a></td>
                     </tr>
                 </xsl:when>
             </xsl:choose>

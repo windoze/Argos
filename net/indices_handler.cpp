@@ -64,9 +64,9 @@ namespace http {
             }
             catch(...) {
                 rep=reply::stock_reply(reply::internal_server_error);
-                LOG4CPLUS_ERROR(err, rep.status << " - " << req.uri);
+                LOG4CPLUS_ERROR(err, "CLIENT:" << req.peer << ", CODE:" << rep.status << " - " << req.uri);
             }
-            LOG4CPLUS_INFO(acc, "CODE:" << rep.status << ", TIME:" << t*1000 << "ms, MEM:" << mc << ", CL:" << rep.content.size() << ", QID:[], URL:" << req.uri);
+            LOG4CPLUS_INFO(acc, "CLIENT:" << req.peer << ", CODE:" << rep.status << ", TIME:" << t*1000 << "ms, MEM:" << mc << ", CL:" << rep.content.size() << ", QID:[], URL:" << req.uri);
             argos::common::get_tl_mem_pool()->reset();
         }
     }   // End of namespace server

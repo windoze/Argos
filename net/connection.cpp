@@ -49,6 +49,7 @@ namespace http {
                 
                 if (result)
                 {
+                    request_.peer=socket().remote_endpoint().address().to_string();
                     request_handler_.handle_request(request_, reply_);
                     boost::asio::async_write(socket_, reply_.to_buffers(),
                                              strand_.wrap(
