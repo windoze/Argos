@@ -19,23 +19,27 @@ namespace http {
     namespace server {
         item_handler::item_handler(argos::index::Index* the_index)
         : the_index_(the_index)
+        , idx_name(get_index_name(the_index))
+        , logger(Logger::getInstance("main"))
+        , acc(Logger::getInstance(std::string("access.")+idx_name))
+        , err(Logger::getInstance(std::string("error.")+idx_name))
         {}
         
         void item_handler::handle_request(const request& req, reply& rep)
         {
-            double start_time=argos::common::get_time();
+            timer t;
+            mem_counter mc;
+            
             boost::scoped_ptr<argos::common::ExecutionContext> pctx(the_index_->create_context());
             argos::common::ExecutionContext &ctx=*(pctx.get());
             argos::query::Query q;
-            size_t orig_size=ctx.temp_pool->get_used_size();
             try {
                 {
-                    size_t orig_size=ctx.temp_pool->get_used_size();
                     std::stringstream sst;
                     size_t qm=req.uri.find('?');
                     if (qm==req.uri.npos) {
                         rep=reply::stock_reply(reply::bad_request);
-                        return;
+                        throw argos::argos_logic_error("");
                     }
                     bool ret=argos::parser::parse_query(req.uri.c_str()+qm+1,
                                                         req.uri.size()-qm-1,
@@ -43,7 +47,7 @@ namespace http {
                                                         ctx);
                     if (!ret) {
                         rep=reply::stock_reply(reply::bad_request);
-                        return;
+                        throw argos::argos_logic_error("");
                     }
                     argos::query::Enquire enq;
                     argos::query::results_t results;
@@ -65,19 +69,19 @@ namespace http {
                     rep.headers[0].value = boost::lexical_cast<std::string>(rep.content.size());
                     rep.headers[1].name = "Content-Type";
                     rep.headers[1].value = ser.content_type();
-                    
-                    std::cout << "Memory used in this query :" << argos::common::get_tl_mem_pool()->get_used_size()-orig_size << std::endl;
                 }
             }
             catch(argos::argos_logic_error &e) {
                 rep=reply::stock_reply(reply::bad_request);
+                LOG4CPLUS_ERROR(err, rep.status << " - " << req.uri);
             }
             catch(...) {
                 rep=reply::stock_reply(reply::internal_server_error);
+                LOG4CPLUS_ERROR(err, rep.status << " - " << req.uri);
             }
-            double end_time=argos::common::get_time();
-            // TODO: Log
-            std::cout << '[' << std::setiosflags(std::ios::fixed) << start_time << "][QID:" << q.query_id_ <<"][CODE:" << rep.status << "] Time: " << (end_time-start_time)*1000 << "ms, Memory: " << argos::common::get_tl_mem_pool()->get_used_size()-orig_size << std::endl;
+
+            LOG4CPLUS_INFO(acc, "CODE:" << rep.status << ", TIME:" << t*1000 << "ms, MEM:" << mc << ", CL:" << rep.content.size() << ", QID:[" << q.query_id_ << "], URL:" << req.uri);
+            
             // TODO: Set a meaningful threshold
             if (ctx.temp_pool->get_used_size()>3*1024*1024) {
                 ctx.temp_pool->reset();

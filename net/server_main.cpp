@@ -13,6 +13,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
+#include "logging.h"
 #include "url_handler.hpp"
 #include "query_handler.hpp"
 #include "item_handler.hpp"
@@ -28,6 +29,8 @@ void run_server(const indices_t &indices,
                 const char *doc_root,
                 int threads)
 {
+    Logger logger = Logger::getInstance("main");
+
     http::server::url_handler *h=new http::server::static_url_handler(doc_root);
     http::server::register_url_handler("/", h);
     
@@ -66,8 +69,10 @@ void run_server(const indices_t &indices,
         n++;
     }
     
+    LOG4CPLUS_INFO(logger, "HTTP server starts listening at " << addr << ':' << port);
     http::server::server s(addr, port, doc_root, threads);
     s.run();
+    LOG4CPLUS_INFO(logger, "HTTP server stopped");
 }
 
 #if 0

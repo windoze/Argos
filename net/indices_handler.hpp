@@ -27,6 +27,9 @@ namespace http {
             
             std::string xsl_;
             indices_t indices_;
+            Logger logger;
+            Logger acc;
+            Logger err;
         };
     }   // End of namespace server
 }   // End of namespace http

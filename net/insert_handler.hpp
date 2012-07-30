@@ -30,9 +30,13 @@ namespace http {
             virtual void handle_request(const request& req, reply& rep);
             
             argos::index::Index *the_index_;
+            std::string idx_name;
             update_queue_t the_update_queue_;
             detail::update_thread_proc *the_update_thread_proc_;
             boost::thread the_update_thread_;
+            Logger logger;
+            Logger acc;
+            Logger err;
         };
     }   // End of namespace server
 }   // End of namespace http

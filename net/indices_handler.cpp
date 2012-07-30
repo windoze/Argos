@@ -17,6 +17,9 @@ namespace http {
         indices_handler::indices_handler(const indices_t &indices)
         : indices_(indices)
         , xsl_("/indices.xsl")
+        , logger(Logger::getInstance("http"))
+        , acc(Logger::getInstance("access"))
+        , err(Logger::getInstance("error"))
         {}
         
         indices_handler::indices_handler(const indices_t &indices, const std::string &xsl)
@@ -26,6 +29,9 @@ namespace http {
 
         void indices_handler::handle_request(const request& req, reply& rep)
         {
+            timer t;
+            mem_counter mc;
+            
             try {
                 pugi::xml_document doc;
                 pugi::xml_node xml = doc.append_child(pugi::node_declaration);
@@ -58,7 +64,9 @@ namespace http {
             }
             catch(...) {
                 rep=reply::stock_reply(reply::internal_server_error);
+                LOG4CPLUS_ERROR(err, rep.status << " - " << req.uri);
             }
+            LOG4CPLUS_INFO(acc, "CODE:" << rep.status << ", TIME:" << t*1000 << "ms, MEM:" << mc << ", CL:" << rep.content.size() << ", QID:[], URL:" << req.uri);
             argos::common::get_tl_mem_pool()->reset();
         }
     }   // End of namespace server

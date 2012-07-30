@@ -60,11 +60,17 @@ namespace http {
 
         void static_url_handler::handle_request(const request& req, reply& rep)
         {
+            timer t;
+            mem_counter mc;
+            
             // Decode url to path.
             std::string request_path;
             if (!url_decode(req.uri, request_path))
             {
                 rep = reply::stock_reply(reply::bad_request);
+                LOG4CPLUS_ERROR(err, rep.status << " - " << req.uri);
+                LOG4CPLUS_INFO(acc, "CODE:" << rep.status << ", TIME:" << t*1000 << "ms, MEM:" << mc << ", QID:[], URL:" << req.uri);
+                
                 return;
             }
             
@@ -73,6 +79,8 @@ namespace http {
                 || request_path.find("..") != std::string::npos)
             {
                 rep = reply::stock_reply(reply::bad_request);
+                LOG4CPLUS_ERROR(err, rep.status << " - " << req.uri);
+                LOG4CPLUS_INFO(acc, "CODE:" << rep.status << ", TIME:" << t*1000 << "ms, MEM:" << mc << ", QID:[], URL:" << req.uri);
                 return;
             }
             
@@ -97,6 +105,8 @@ namespace http {
             if (!is)
             {
                 rep = reply::stock_reply(reply::not_found);
+                LOG4CPLUS_ERROR(err, rep.status << " - " << req.uri);
+                LOG4CPLUS_INFO(acc, "CODE:" << rep.status << ", TIME:" << t*1000 << "ms, MEM:" << mc << ", QID:[], URL:" << req.uri);
                 return;
             }
             
@@ -112,6 +122,7 @@ namespace http {
             rep.headers[0].value = boost::lexical_cast<std::string>(rep.content.size());
             rep.headers[1].name = "Content-Type";
             rep.headers[1].value = mime_types::extension_to_type(extension);
+            LOG4CPLUS_INFO(acc, "CODE:" << rep.status << ", TIME:" << t*1000 << "ms, MEM:" << mc << ", CL:" << rep.content.size() << ", QID:[], URL:" << req.uri);
         }
         
         typedef std::pair<std::string, url_handler *> handler_entry_t;

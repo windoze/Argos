@@ -21,15 +21,20 @@ namespace http {
     namespace server {
         query_handler::query_handler(argos::index::Index* the_index)
         : the_index_(the_index)
+        , idx_name(get_index_name(the_index))
+        , logger(Logger::getInstance("main"))
+        , acc(Logger::getInstance(std::string("access.")+idx_name))
+        , err(Logger::getInstance(std::string("error.")+idx_name))
         {}
         
         void query_handler::handle_request(const request& req, reply& rep)
         {
-            double start_time=argos::common::get_time();
+            timer t;
+            mem_counter mc;
+
             argos::query::Query q;
             boost::scoped_ptr<argos::common::ExecutionContext> pctx(the_index_->create_context());
             argos::common::ExecutionContext &ctx=*(pctx.get());
-            size_t orig_size=ctx.temp_pool->get_used_size();
             try {
                 {
                     // So far we cannot put content into mem_pool as the content may be written out by
@@ -77,13 +82,15 @@ namespace http {
             }
             catch(argos::argos_logic_error &e) {
                 rep=reply::stock_reply(reply::bad_request);
+                LOG4CPLUS_ERROR(err, rep.status << " - " << req.uri);
             }
             catch(...) {
                 rep=reply::stock_reply(reply::internal_server_error);
+                LOG4CPLUS_ERROR(err, rep.status << " - " << req.uri);
             }
-            double end_time=argos::common::get_time();
-            // TODO: Log
-            std::cout << '[' << std::setiosflags(std::ios::fixed) << start_time << "][QID:" << q.query_id_ <<"][CODE:" << rep.status << "] Time: " << (end_time-start_time)*1000 << "ms, Memory: " << argos::common::get_tl_mem_pool()->get_used_size()-orig_size << std::endl;
+
+            LOG4CPLUS_INFO(acc, "CODE:" << rep.status << ", TIME:" << t*1000 << "ms, MEM:" << mc << ", CL:" << rep.content.size() << ", QID:[" << q.query_id_ << "], URL:" << req.uri);
+
             // TODO: Set a meaningful threshold
             if (ctx.temp_pool->get_used_size()>3*1024*1024) {
                 ctx.temp_pool->reset();

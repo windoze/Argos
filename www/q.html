@@ -2,6 +2,9 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <script language="javascript">
+            function selidx(obj) {
+                document.forms[0].action="/"+obj.options[obj.selectedIndex].value+"/query";
+            }
             function loadidx() {
                 var xmlhttp = new XMLHttpRequest();
                 xmlhttp.open("GET", "/indices.xml", false);
@@ -15,9 +18,7 @@
                     elOptNew.value = idxname;
                     document.getElementById("idxsel").add(elOptNew, null);
                 }
-            }
-            function selidx(obj) {
-                document.forms[0].action="/"+obj.options[obj.selectedIndex].value+"/query";
+                selidx(document.getElementById("idxsel"));
             }
         </script>
 		<title>Query Test</title>

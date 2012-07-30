@@ -80,6 +80,10 @@ namespace http {
         , the_update_queue_()
         , the_update_thread_proc_(new detail::update_thread_proc(the_update_queue_, the_index))
         , the_update_thread_(*the_update_thread_proc_)
+        , idx_name(get_index_name(the_index))
+        , logger(Logger::getInstance("main"))
+        , acc(Logger::getInstance(std::string("access.")+idx_name))
+        , err(Logger::getInstance(std::string("error.")+idx_name))
         {}
         
         insert_handler::~insert_handler()
@@ -90,11 +94,14 @@ namespace http {
         }
         
         void insert_handler::handle_request(const request& req, reply& rep) {
+            timer t;
+            mem_counter mc;
+            
             try {
                 size_t qm=req.uri.find('?');
                 if (qm==req.uri.npos) {
                     rep=reply::stock_reply(reply::bad_request);
-                    return;
+                    throw argos::argos_logic_error("");
                 }
                 std::string data(req.uri.c_str()+qm+1, req.uri.size()-qm-1);
                 std::string doc;
@@ -104,10 +111,13 @@ namespace http {
             }
             catch(argos::argos_logic_error &e) {
                 rep=reply::stock_reply(reply::bad_request);
+                LOG4CPLUS_ERROR(err, rep.status << " - " << req.uri);
             }
             catch(...) {
                 rep=reply::stock_reply(reply::internal_server_error);
+                LOG4CPLUS_ERROR(err, rep.status << " - " << req.uri);
             }
+            LOG4CPLUS_INFO(acc, "CODE:" << rep.status << ", TIME:" << t*1000 << "ms, MEM:" << mc << ", CL:" << rep.content.size() << ", QID:[], URL:" << req.uri);
         }
     }   // End of namespace server
 }   // End of namespace http

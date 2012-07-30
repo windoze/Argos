@@ -21,6 +21,10 @@ namespace http {
             virtual void handle_request(const request& req, reply& rep);
             
             argos::index::Index *the_index_;
+            std::string idx_name;
+            Logger logger;
+            Logger acc;
+            Logger err;
         };
     }   // End of namespace server
 }   // End of namespace http
