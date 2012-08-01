@@ -9,11 +9,19 @@
 /**
  start ::= statement
  
- statement ::= 'SELECT' field_list|'*' [match_clause] [where_clause] [sort_clause] [histo_clause]
+ statement ::= 'SELECT' field_list|'*' from_clause [match_clause] [where_clause] [sort_clause] [histo_clause]
  
- field_list ::= expression_list
+ field_list ::= named_expression_list
  
- match_clause ::= 'MATCH' match_expr|'*'
+ named_expression_list ::= named_expression[',' named_expression]*
+ 
+ named_expression ::= expression ['AS' identifier]
+ 
+ match_clause ::= 'MATCH' (match_expr | '*')
+ 
+ from_clause ::= 'FROM' index_name
+ 
+ index_name ::= identifier
  
  match_expr ::= match_term ['OR' match_term]*
  
