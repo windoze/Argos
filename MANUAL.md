@@ -23,8 +23,8 @@ In node `<fields>`, one or more fields can be defined by adding `<field>` node w
     + `double`, a signed 8 bytes double number.
     + `geolocation`, a pair of 4 bytes float numbers, first is latitude, then langitude.
     + `string`, a string with UTF-8 encoding. NOTE: Argos doesn't enforce character encoding, but indexing may fail if the string is not correctly encoded.
-* `bytes`, optional, only usable when type="integer", can be 1, 2, 4, or 8, default is 8.
-* `multi`, optional, only usable when type is not "string", can be "true" or "false", the field is multi-value when multi="true".
+* `bytes`, optional, only usable when `type="integer"`, can be 1, 2, 4, or 8, default is 8.
+* `multi`, optional, only usable when type is not `"string"`, can be `true` or `false`, the field is multi-value when `multi="true"`.
 * `store`, optional, can be `"true"` or `"false"`, if `store="false"`, the field itself is not stored in the index and the field value cannot be retrieved, default is `"true"`.
 * `index`, optional, can be `"true"` or `"false"`, the field will be indexed if `index="true"`. Different type of fields will be indexed differently.
 * `namespace`, optional, only usable when `index="true"`, 2 or more fields can use same namespace, which means the HAS() will search terms in all of them. By default each field has different namespace; Fields with `namespace="-"` can be searched via term query.
@@ -98,7 +98,7 @@ Expression syntax is in prefix form, following functions are supported:
 * Document specific operators, start with '@'
     + `@DOCCOUNT`, returns number of documents in the index
     + `@DL(field)`, return number of terms in the field for current document, this value depends on the analyzer the field uses
-    + `@HAS(field,"text"), this operator is used with `INFO(field,"text")` in match condition, returns 0 or 1 if the field contains `"text"`. NOTE: Without INFO part in match condition, this operator may return 0 even if text is actually in the field
+    + `@HAS(field,"text")`, this operator is used with `INFO(field,"text")` in match condition, returns 0 or 1 if the field contains `"text"`. NOTE: Without INFO part in match condition, this operator may return 0 even if text is actually in the field
 
 #### Sorting Criteria ####
 
