@@ -19,10 +19,29 @@
 
 namespace argos {
     namespace common {
-        size_t detail::get_aligned_seg_size(size_t suggested_min_seg_size)
+        inline size_t detail::get_aligned_seg_size(size_t suggested_min_seg_size)
         {
             long syspagesize=sysconf(_SC_PAGESIZE);
             return (suggested_min_seg_size+syspagesize-1)/syspagesize*syspagesize;
+        }
+        
+        void *mem_pool::segment::init(int fd, size_t offset, size_t size)
+        {
+            void *base=MAP_FAILED;
+            if(fd<0) {
+                // Create anonymous mapping, fd set to -1 as it may have side-effects
+                // For anonymous mapping, offset is ignored
+                base=mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+            } else {
+                // Create named/shared file mapping
+                base=mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, offset);
+            }
+            if (base==MAP_FAILED) {
+                // TODO: Error log
+                perror("XXX");
+                base=0;
+            }
+            return base;
         }
         
         mem_pool::mem_pool(size_t seg_size, const char *name)
@@ -79,9 +98,9 @@ namespace argos {
             mprotect(get_index(), 8192, PROT_READ|PROT_WRITE);
             for (int i=0; i<get_index()->used_seg; i++) {
                 //munmap(get_seg(i).base_, get_index()->seg_size);
-                munmap(get_seg(i).base_, actual_seg_size_);
+                munmap(segment_bases_[i], actual_seg_size_);
             }
-            munmap(idx_seg_.base_, SEG_INDEX_SIZE);
+            munmap(idx_, SEG_INDEX_SIZE);
         }
         
         bool mem_pool::init(size_t seg_size)
@@ -108,11 +127,10 @@ namespace argos {
             mprotect(get_index(), 8192, PROT_READ|PROT_WRITE);
             for (int i=0; i<get_index()->used_seg; i++) {
                 //munmap(get_seg(i).base_, get_index()->seg_size);
-                munmap(get_seg(i).base_, actual_seg_size_);
+                munmap(segment_bases_[i], actual_seg_size_);
                 get_seg(i).clear();
             }
-            munmap(idx_seg_.base_, SEG_INDEX_SIZE);
-            idx_seg_.clear();
+            munmap(idx_, SEG_INDEX_SIZE);
             mprotect(get_index(), 8192, PROT_READ);
         }
         
@@ -144,10 +162,10 @@ namespace argos {
         bool mem_pool::save()
         {
             for (int i=0; i<get_index()->used_seg; i++) {
-                if(msync(get_seg(i).base_, get_index()->seg_size, MS_SYNC)<0)
+                if(msync(segment_bases_[i], get_index()->seg_size, MS_SYNC)<0)
                     return false;
             }
-            return msync(idx_seg_.base_, SEG_INDEX_SIZE, MS_SYNC)>=0;
+            return msync(idx_, SEG_INDEX_SIZE, MS_SYNC)>=0;
         }
         
         bool mem_pool::expand(size_t size)
@@ -193,7 +211,7 @@ namespace argos {
                     return INVALID_OFFSET;
                 index=int(get_index()->used_seg)-1;
             }
-            OFFSET off=map_offset_seg_to_pool(index, get_seg(index).add_chunk(p, length));
+            OFFSET off=map_offset_seg_to_pool(index, get_seg(index).add_chunk(p, length, segment_bases_[index]));
             mprotect(get_index(), 8192, PROT_READ|PROT_WRITE);
             get_seg(index).used_size_+=length;
             mprotect(get_index(), 8192, PROT_READ);
@@ -227,7 +245,7 @@ namespace argos {
             idx_=get_index();
             if (initialize) {
                 // Reinitialize segment index
-                memset(idx_seg_.base_, 0, SEG_INDEX_SIZE);
+                memset(idx_, 0, SEG_INDEX_SIZE);
             }
             return true;
         }
@@ -283,9 +301,16 @@ namespace argos {
                 }
             }
             // TODO: Error log
-            seg->init(fd, get_seg_offset(index), size);
+            void *base=seg->init(fd, get_seg_offset(index), size);
             close(fd);
-            return seg->check();
+            // Set segment base
+            if (index<0) {
+                // Opening index segment
+                idx_=(col_idx *)base;
+            } else {
+                segment_bases_[index]=base;
+            }
+            return seg->check(base);
         }
         
         bool mem_pool::set_file_size(int fd, size_t sz, bool may_shrink) {
@@ -304,23 +329,6 @@ namespace argos {
             return true;
         }
         
-        void mem_pool::segment::init(int fd, size_t offset, size_t size)
-        {
-            if(fd<0) {
-                // Create anonymous mapping, fd set to -1 as it may have side-effects
-                // For anonymous mapping, offset is ignored
-                base_=mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-            } else {
-                // Create named/shared file mapping
-                base_=mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, offset);
-            }
-            if (base_==MAP_FAILED) {
-                // TODO: Error log
-                perror("XXX");
-                base_=0;
-            }
-        }
-
         bool mem_pool::rename(const char *new_name) {
             if (!name_[0]) {
                 // No need to rename anonymous mapping

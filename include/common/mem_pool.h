@@ -289,7 +289,7 @@ namespace argos {
                     return NULL;
                 }
                 OFFSET seg_off=offset % get_index()->seg_size;
-                return get_seg(int(seg_idx)).get_addr(seg_off);
+                return get_seg(int(seg_idx)).get_addr(seg_off, segment_bases_[seg_idx]);
             }
             
             /**
@@ -438,16 +438,16 @@ namespace argos {
         private:
             struct segment
             {
-                inline void *get_addr(OFFSET o) const
+                inline void *get_addr(OFFSET o, void *base) const
                 {
-                    if(!base_) return NULL;
-                    return ((char *)base_)+o;
+                    if(!base) return NULL;
+                    return ((char *)base)+o;
                 }
                 
-                inline OFFSET add_chunk(const void *p, size_t length)
+                inline OFFSET add_chunk(const void *p, size_t length, void *base)
                 {
                     OFFSET ret=used_size_;
-                    memcpy(((char *)base_)+used_size_, p, length);
+                    memcpy(((char *)base)+used_size_, p, length);
                     //used_size_+=length;
                     return ret;
                 }
@@ -459,7 +459,7 @@ namespace argos {
                     return ret;
                 }
                 
-                void init(int fd, size_t offset, size_t size);
+                void *init(int fd, size_t offset, size_t size);
                 
                 inline void clear()
                 {
@@ -467,12 +467,12 @@ namespace argos {
                     memset(this, 0, sizeof(segment));
                 }
                 
-                inline bool check() const {
-                    return base_!=NULL;
+                inline bool check(void *base) const {
+                    return base!=NULL;
                 }
                 
                 size_t used_size_;
-                void *base_;
+                //void *base_;
             };
             
             struct col_idx {
@@ -486,7 +486,7 @@ namespace argos {
             }
             
             inline col_idx *get_index() const {
-                return (col_idx *)(idx_seg_.base_);
+                return idx_;
             }
             
             inline segment &get_seg(int index) const {
@@ -513,8 +513,9 @@ namespace argos {
         private:
             char name_[PATH_MAX];
             segment idx_seg_;
-            size_t actual_seg_size_;
             col_idx *idx_;
+            void *segment_bases_[SEG_INDEX_SIZE/sizeof(void *)];
+            size_t actual_seg_size_;
         };
         
         typedef boost::shared_ptr<mem_pool> mem_pool_ptr_t;
