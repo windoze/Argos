@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 0d0a.com. All rights reserved.
 //
 
+#include <utility>
 #include <queue>
 #include <algorithm>
 #include <boost/thread/mutex.hpp>
@@ -123,7 +124,7 @@ namespace argos {
                     // Queue closed
                     return false;
                 }
-                the_queue_.push(data);
+                the_queue_.push(std::move<T>(data));
                 empty_cv_.notify_one();
                 return true;
             }

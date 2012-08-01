@@ -31,9 +31,7 @@ namespace argos {
                 
                 static volatile double get_time() {
 #if __cplusplus>=201103L
-                    int ct;
-                    std::atomic_load<int>(&current_timer, &ct);
-                    return timer[ct];
+                    return timer[std::atomic_load<int>(&current_timer) ^ 1];
 #else
                     return timer[current_timer];
 #endif
@@ -45,11 +43,7 @@ namespace argos {
                         if (gettimeofday(&tv, NULL)==0) {
                             double t=double(tv.tv_sec) + double(tv.tv_usec)/1000000;
 #if __cplusplus>=201103L
-                            int ct;
-                            std::atomic_load<int>(&current_timer, &ct);
-                            ct = ct ^ 1;
-                            timer[ct]=t;
-                            std::atomic_save<int>(&current_timer, &ct);
+                            timer[std::atomic_fetch_xor(&current_timer, 1)]=t;
 #else
                             timer[current_timer ^ 1]=t;
                             current_timer = current_timer ^ 1;
@@ -69,7 +63,7 @@ namespace argos {
             
             double timer_thread::timer[2]={0,0};
 #if __cplusplus>=201103L
-            std::atomic<int> timer_thread::current_timer=0;
+            std::atomic<int> timer_thread::current_timer;
 #else
             volatile int timer_thread::current_timer=0;
 #endif

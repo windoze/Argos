@@ -139,7 +139,7 @@ namespace argos {
             inline void push(value_type &&t) {
                 if (size_ < capacity()) {
                     size_++;
-                    at(size_-1) = t;
+                    std::swap(at(size_-1), std::move<value_type>(t));
                     siftup();
                 } else if (size_ > 0 && !less_than(t, top())) {
                     top() = t;
