@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.3)
 project(Argos)
 set_property(GLOBAL PROPERTY COMPILE_FLAGS "-m64")
 set_property(GLOBAL PROPERTY LINK_FLAGS "-m64")
