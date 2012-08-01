@@ -70,6 +70,10 @@ Searcher has following command-line arguments:
 
     Argos threading model is effective enough so you should not use too many threads. A reasonable value is the number of CPU.
 
+* `-l|--log-config`, log configuration file to be used, which is a [log4cplus](log4cplus.sf.net) log properties file.
+
+    All logs are printed to stdout if the argument is missing.
+
 ### Query ###
 
 URL prefix is `/index_name/query`, following parameters are supported:
