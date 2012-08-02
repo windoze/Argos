@@ -171,7 +171,6 @@ namespace argos {
             ~hash_table()
             {
                 serialize();
-                clear();
             }
             
             iterator begin() 
@@ -803,7 +802,6 @@ namespace argos {
             ~hash_table()
             {
                 serialize();
-                clear();
             }
             
             iterator begin() 
