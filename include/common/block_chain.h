@@ -17,12 +17,10 @@
 
 namespace argos {
     namespace common {
-        const int BLOCK_ELEMENTS=60;
-
         /**
          * Template block_chain use to store doc vector
          */
-        template<typename T>
+        template<typename T, int BLOCK_ELEMENTS=10>
         struct block_chain
         {
             // STL container compliance
@@ -41,15 +39,15 @@ namespace argos {
             };
             
             struct block {
-                uint32_t size;
-                value_type content[BLOCK_ELEMENTS];
-                common::OFFSET next;
                 bool empty() const { return size==0; }
                 bool full() const { return size==BLOCK_ELEMENTS; }
                 void push_back(value_type v) {
                     content[size]=v;
                     size++;
                 }
+                uint32_t size;
+                common::OFFSET next;
+                value_type content[BLOCK_ELEMENTS];
             };
             
             typedef common::offptr_t<block> block_ptr_t;
