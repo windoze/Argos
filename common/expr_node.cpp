@@ -9,7 +9,7 @@
 
 namespace argos {
     namespace common {
-        std::string Constant::to_string() const
+        std::string Constant::to_string_impl() const
         {
             std::stringstream sst;
             sst << std::fixed;
@@ -27,7 +27,6 @@ namespace argos {
                     sst << '"' <<  value.string << '"';
                     break;
                 case VT_ARRAY:
-                    // TODO:
                     sst << '[';
                     for (int i=0; i<value.array.size(); i++) {
                         sst << Constant(value.array.get_element(i)).to_string();
@@ -41,39 +40,6 @@ namespace argos {
                     break;
             }
             return sst.str();
-        }
-        
-        std::ostream &Constant::serialize(std::ostream &os) const
-        {
-            os << std::fixed;
-            switch (value.type_) {
-                case VT_INTEGER:
-                    os << value.number;
-                    break;
-                case VT_DOUBLE:
-                    os << value.dnumber;
-                    break;
-                case VT_GEOLOCATION:
-                    os << value.dnumber;
-                    break;
-                case VT_STRING:
-                    os << '[' << value.geolocation.latitude << ',' << value.geolocation.longitude << ']';
-                    break;
-                case VT_ARRAY:
-                    // '['+']'+size*(number+','), int64_t has at most 21 chars, double is much shorter
-                    // There are some bytes wasted
-                    os << '[';
-                    for (int i=0; i<value.array.size(); i++) {
-                        Constant(value.array.get_element(i)).serialize(os);
-                        if (i!=value.array.size()-1) {
-                            os << ',';
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-            return os;
         }
         
         ExprNode::ExprNode(const char *op_name)
@@ -139,7 +105,7 @@ namespace argos {
             return ret;
         }
         
-        std::string ExprNode::to_string() const
+        std::string ExprNode::to_string_impl() const
         {
             std::stringstream sst;
             sst << op->get_name();
@@ -152,19 +118,6 @@ namespace argos {
             }
             sst << ')';
             return sst.str();
-        }
-        
-        std::ostream &ExprNode::serialize(std::ostream &os) const
-        {
-            os << op->get_name() << '(';
-            for (size_t i=0; i<oprands.size(); i++) {
-                oprands[i]->serialize(os);
-                if (i<oprands.size()-1) {
-                    os << ',';
-                }
-            }
-            os << ')';
-            return os;
         }
     }   // End of namespace query
 }   // End of namespace argos

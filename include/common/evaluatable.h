@@ -63,12 +63,34 @@ namespace argos {
             /**
              * Serialize this evaluatable, returnd value must can be re-parsed into same evaluatable
              */
-            virtual std::string to_string() const=0;
+            inline std::string to_string() const
+            {
+                if (name_.empty()) {
+                    return to_string_impl();
+                }
+                return name_;
+            }
 
             /**
              * Serialize this evaluatable into a std::ostream
              */
-            virtual std::ostream &serialize(std::ostream &os) const=0;
+            inline std::ostream &serialize(std::ostream &os) const {
+                os << to_string();
+                return os;
+            }
+            
+            inline const std::string &get_name() const {
+                return name_;
+            }
+            
+            inline void set_name(const std::string &name) {
+                name_=name;
+            }
+            
+            virtual std::string to_string_impl() const=0;
+            
+        private:
+            std::string name_;
         };
         
         typedef boost::shared_ptr<Evaluatable> eva_ptr_t;
@@ -104,9 +126,7 @@ namespace argos {
             virtual bool is_const() const { return true; }
             virtual bool uses_match_info() const { return false; }
             virtual common::Value evaluate(docid did, ExecutionContext &context) const { return value; }
-            virtual std::string to_string() const;
-            virtual std::ostream &serialize(std::ostream &os) const;
-            
+            virtual std::string to_string_impl() const;
         private:
             common::Value value;
         };

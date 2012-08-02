@@ -32,10 +32,7 @@ namespace argos {
             virtual bool is_const() const { return false; }
             virtual bool uses_match_info() const { return false; }
             virtual common::Value evaluate(docid did, common::ExecutionContext &context) const;
-            virtual std::string to_string() const;
-            virtual size_t buffer_size() const;
-            virtual size_t serialize(char *buf) const;
-            virtual std::ostream &serialize(std::ostream &os) const;
+            virtual std::string to_string_impl() const;
             
             int field_id() const { return fid_; }
         private:

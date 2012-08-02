@@ -263,74 +263,86 @@ namespace argos {
                 }
                 case TT_ID:
                 {
-                    if (t.sz==1 && t.p[0]=='E') {
-                        return eva_ptr_t(new common::Constant(common::Value(2.718281828459045)));
-                    } else if (t.sz==2 && t.p[0]=='P' && t.p[1]=='I') {
-                        return eva_ptr_t(new common::Constant(common::Value(3.141592653589793)));
-                    } else if (t.sz==3 && t.p[0]=='N' && t.p[1]=='O' && t.p[2]=='W') {
-                        return eva_ptr_t(new common::Constant(common::Value(get_time())));
-                    } else if (t.sz==4 && t.p[0]=='S' && t.p[1]=='O' && t.p[2]=='F' && t.p[3]=='A') {
-                        // Moving sofa constant :)
-                        return eva_ptr_t(new common::Constant(common::Value(2.207416099162478)));
-                    }
                     token tn=peek_next_token(str, len);
-                    if (tn.type!=TT_LPAREN) {
-                        // TODO: Use mem_pool_allocator
-                        // Generate FieldEvaluator
+                    if (tn.type==TT_COLON) {
+                        // Consume colon
+                        next_token(str, len);
+                        eva_ptr_t expr=parse_expr(str, len, context);
+                        if (expr) {
+                            expr->set_name(std::string(t.p, t.sz));
+                        }
+                        return expr;
+                    } else {
+                        if (t.sz==1 && t.p[0]=='E') {
+                            return eva_ptr_t(new common::Constant(common::Value(2.718281828459045)));
+                        } else if (t.sz==2 && t.p[0]=='P' && t.p[1]=='I') {
+                            return eva_ptr_t(new common::Constant(common::Value(3.141592653589793)));
+                        } else if (t.sz==3 && t.p[0]=='N' && t.p[1]=='O' && t.p[2]=='W') {
+                            return eva_ptr_t(new common::Constant(common::Value(get_time())));
+                        } else if (t.sz==4 && t.p[0]=='S' && t.p[1]=='O' && t.p[2]=='F' && t.p[3]=='A') {
+                            // Moving sofa constant :)
+                            return eva_ptr_t(new common::Constant(common::Value(2.207416099162478)));
+                        }
+                        token tn=peek_next_token(str, len);
+                        if (tn.type!=TT_LPAREN) {
+                            // TODO: Use mem_pool_allocator
+                            // Generate FieldEvaluator
 #if 0
-                        return eva_ptr_t(new index::FieldEvaluator(context.get_field_config(), t.p, t.sz));
+                            return eva_ptr_t(new index::FieldEvaluator(context.get_field_config(), t.p, t.sz));
 #else
-                        int fid=context.get_field_config()->get_field_id(t.p, t.sz);
-                        if (fid<0) {
-                            throw argos_bad_field(std::string(t.p, t.sz).c_str());
-                        }
-                        field_eva_cache_t::const_iterator i=context.field_eva_cache.find(fid);
-                        if(i==context.field_eva_cache.end())
-                        {
-                            eva_ptr_t e=eva_ptr_t(new index::FieldEvaluator(context.get_field_config(), fid));
-                            context.field_eva_cache[fid]=e;
-                            return e;
-                        }
-                        return i->second;
+                            int fid=context.get_field_config()->get_field_id(t.p, t.sz);
+                            if (fid<0) {
+                                throw argos_bad_field(std::string(t.p, t.sz).c_str());
+                            }
+                            field_eva_cache_t::const_iterator i=context.field_eva_cache.find(fid);
+                            if(i==context.field_eva_cache.end())
+                            {
+                                eva_ptr_t e=eva_ptr_t(new index::FieldEvaluator(context.get_field_config(), fid));
+                                context.field_eva_cache[fid]=e;
+                                return e;
+                            }
+                            return i->second;
 #endif
+                        }
+                        
+                        // TODO: Use mem_pool_allocator
+                        expr_ptr_t node=expr_ptr_t(new ExprNode(t.p, t.sz));
+                        if (!node->op) {
+                            // Undefined operator
+                            throw argos_bad_operator(std::string(t.p, t.sz).c_str());
+                            return eva_ptr_t();
+                        }
+                        // Consume '('
+                        token tp=next_token(str, len);
+                        if (tp.type!=TT_LPAREN) {
+                            // Operator must be followed by '('
+                            throw argos_syntax_error("Operator must be followed by '('");
+                            return eva_ptr_t();
+                        }
+                        if (!parse_expr_list(str, len, node->oprands, context)) {
+                            return eva_ptr_t();
+                        }
+                        // Consume ')'
+                        tp=next_token(str, len);
+                        if (tp.type!=TT_RPAREN) {
+                            // Missing ')'
+                            throw argos_syntax_error("Missing ')'");
+                            return eva_ptr_t();
+                        }
+                        // Validate arity
+                        if (!node->op->validate_arity(node->oprands.size())) {
+                            // Wrong number of oprands
+                            throw argos_syntax_error("Wrong number of arguments");
+                            return eva_ptr_t();
+                        }
+                        return optimize(node, context);
+                        //return node;
                     }
-                    
-                    // TODO: Use mem_pool_allocator
-                    expr_ptr_t node=expr_ptr_t(new ExprNode(t.p, t.sz));
-                    if (!node->op) {
-                        // Undefined operator
-                        throw argos_bad_operator(std::string(t.p, t.sz).c_str());
-                        return eva_ptr_t();
-                    }
-                    // Consume '('
-                    token tp=next_token(str, len);
-                    if (tp.type!=TT_LPAREN) {
-                        // Operator must be followed by '('
-                        throw argos_syntax_error("Operator must be followed by '('");
-                        return eva_ptr_t();
-                    }
-                    if (!parse_expr_list(str, len, node->oprands, context)) {
-                        return eva_ptr_t();
-                    }
-                    // Consume ')'
-                    tp=next_token(str, len);
-                    if (tp.type!=TT_RPAREN) {
-                        // Missing ')'
-                        throw argos_syntax_error("Missing ')'");
-                        return eva_ptr_t();
-                    }
-                    // Validate arity
-                    if (!node->op->validate_arity(node->oprands.size())) {
-                        // Wrong number of oprands
-                        throw argos_syntax_error("Wrong number of arguments");
-                        return eva_ptr_t();
-                    }
-                    return optimize(node, context);
-                    //return node;
                 }
+                    break;
             }
             // Expression can only be constants or ID(...)
-            return eva_ptr_t();
+            throw argos_syntax_error("Syntax error in expression");
         }
         
         bool parse_sort_crit(const char *&str, size_t &len, query::sort_criteria &sort_crit, ExecutionContext &context)

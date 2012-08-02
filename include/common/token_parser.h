@@ -27,6 +27,7 @@ namespace argos {
         const int TT_FPAIR=11;
         const int TT_AT=12;
         const int TT_SEMI=13;   // Semicolon
+        const int TT_COLON=14;
         
         struct token {
             const char *p;

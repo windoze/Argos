@@ -61,7 +61,7 @@ namespace argos {
                 return common::Value((*l)[match_info_pos_]);
             }
             
-            virtual std::string to_string() const {
+            virtual std::string to_string_impl() const {
                 // @TC("term") or @TC(field,"term")
                 if (field_.empty()) {
                     std::string s="@TC(\"";
@@ -77,16 +77,6 @@ namespace argos {
                 return s;
             }
             
-            virtual std::ostream &serialize(std::ostream &os) const {
-                // @TC("term") or @TC(field,"term")
-                if (field_.empty()) {
-                    os << "@TC(\"" << term_ << "\")";
-                } else {
-                    os << "@TC(" << field_ << ",\"" << term_ << "\")";
-                }
-                return os;
-            }
-
         private:
             std::string term_;
             std::string field_;
@@ -148,7 +138,7 @@ namespace argos {
                 return common::Value(tf);
             }
             
-            virtual std::string to_string() const {
+            virtual std::string to_string_impl() const {
                 // @TF("term") or @TF(field,"term")
                 if (field_.empty()) {
                     std::string s="@TF(\"";
@@ -162,16 +152,6 @@ namespace argos {
                 s+=term_;
                 s+="\")";
                 return s;
-            }
-            
-            virtual std::ostream &serialize(std::ostream &os) const {
-                // @TF("term") or @TF(field,"term")
-                if (field_.empty()) {
-                    os << "@TF(\"" << term_ << "\")";
-                } else {
-                    os << "@TF(" << field_ << ",\"" << term_ << "\")";
-                }
-                return os;
             }
             
         private:
@@ -217,7 +197,7 @@ namespace argos {
                 return common::Value(int64_t(ret));
             }
             
-            virtual std::string to_string() const {
+            virtual std::string to_string_impl() const {
                 // @DL or @DL(field)
                 if (field_.empty()) {
                     return "@DL";
@@ -227,16 +207,7 @@ namespace argos {
                 s+=")";
                 return s;
             }
-            virtual std::ostream &serialize(std::ostream &os) const {
-                // @DL or @DL(field)
-                if (field_.empty()) {
-                    os << "@DL";
-                } else {
-                    os << "@DL(" << field_ << ")";
-                }
-                return os;
-            }
-            
+
         private:
             std::string field_;
             std::vector<int> included_fields_;
@@ -278,7 +249,7 @@ namespace argos {
                 return dc_;
             }
             
-            virtual std::string to_string() const {
+            virtual std::string to_string_impl() const {
                 // @DC("term") or @DC(field,"term")
                 if (field_.empty()) {
                     std::string s="@DC(\"";
@@ -292,16 +263,6 @@ namespace argos {
                 s+=term_;
                 s+="\")";
                 return s;
-            }
-            
-            virtual std::ostream &serialize(std::ostream &os) const {
-                // @DC("term") or @DC(field,"term")
-                if (field_.empty()) {
-                    os << "@DC(\"" << term_ << "\")";
-                } else {
-                    os << "@DC(" << field_ << ",\"" << term_ << "\")";
-                }
-                return os;
             }
             
         private:
@@ -349,7 +310,7 @@ namespace argos {
                 return idf_;
             }
             
-            virtual std::string to_string() const {
+            virtual std::string to_string_impl() const {
                 // @IDF("term") or @IDF(field,"term")
                 if (field_.empty()) {
                     std::string s="@IDF(\"";
@@ -363,16 +324,6 @@ namespace argos {
                 s+=term_;
                 s+="\")";
                 return s;
-            }
-            
-            virtual std::ostream &serialize(std::ostream &os) const {
-                // @IDF("term") or @IDF(field,"term")
-                if (field_.empty()) {
-                    os << "@IDF(\"" << term_ << "\")";
-                } else {
-                    os << "@IDF(" << field_ << ",\"" << term_ << "\")";
-                }
-                return os;
             }
             
         private:
@@ -463,7 +414,7 @@ namespace argos {
                 return common::Value(ret);
             }
             
-            virtual std::string to_string() const {
+            virtual std::string to_string_impl() const {
                 // @TFIDF("text") or @TFIDF(field,"text")
                 if (field_.empty()) {
                     std::string s="@TFIDF(\"";
@@ -477,16 +428,6 @@ namespace argos {
                 s+=term_;
                 s+="\")";
                 return s;
-            }
-            
-            virtual std::ostream &serialize(std::ostream &os) const {
-                // @TFIDF("text") or @TFIDF(field,"text")
-                if (field_.empty()) {
-                    os << "@TFIDF(\"" << term_ << "\")";
-                } else {
-                    os << "@TFIDF(" << field_ << ",\"" << term_ << "\")";
-                }
-                return os;
             }
             
         private:
@@ -586,7 +527,7 @@ namespace argos {
                 return common::Value(ret/norm_factor_);
             }
             
-            virtual std::string to_string() const {
+            virtual std::string to_string_impl() const {
                 // @NTFIDF("text") or @NTFIDF(field,"text")
                 if (field_.empty()) {
                     std::string s="@NTFIDF(\"";
@@ -600,16 +541,6 @@ namespace argos {
                 s+=term_;
                 s+="\")";
                 return s;
-            }
-            
-            virtual std::ostream &serialize(std::ostream &os) const {
-                // @NTFIDF("text") or @NTFIDF(field,"text")
-                if (field_.empty()) {
-                    os << "@NTFIDF(\"" << term_ << "\")";
-                } else {
-                    os << "@NTFIDF(" << field_ << ",\"" << term_ << "\")";
-                }
-                return os;
             }
             
         private:
@@ -681,7 +612,7 @@ namespace argos {
                 return common::Value(int64_t(1));
             }
             
-            virtual std::string to_string() const {
+            virtual std::string to_string_impl() const {
                 // @HAS("text") or @HAS(field,"text")
                 if (field_.empty()) {
                     std::string s="@HAS(\"";
@@ -695,16 +626,6 @@ namespace argos {
                 s+=term_;
                 s+="\")";
                 return s;
-            }
-            
-            virtual std::ostream &serialize(std::ostream &os) const {
-                // @HAS("text") or @HAS(field,"text")
-                if (field_.empty()) {
-                    os << "@HAS(\"" << term_ << "\")";
-                } else {
-                    os << "@HAS(" << field_ << ",\"" << term_ << "\")";
-                }
-                return os;
             }
             
         private:
@@ -732,7 +653,7 @@ namespace argos {
                 return doccount_;
             }
             
-            virtual std::string to_string() const {
+            virtual std::string to_string_impl() const {
                 // @DOCCOUNT
                 return "@DOCCOUNT";
             }

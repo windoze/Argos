@@ -79,27 +79,11 @@ namespace argos {
             }
         }
         
-        size_t FieldEvaluator::buffer_size() const
-        {
-            return strlen(field_config_->get_field_def(fid_)->get_name());
-        }
-        
-        std::string FieldEvaluator::to_string() const
+        std::string FieldEvaluator::to_string_impl() const
         {
             return field_config_->get_field_def(fid_)->get_name();
         }
         
-        size_t FieldEvaluator::serialize(char *buf) const
-        {
-            return sprintf(buf, "%s", field_config_->get_field_def(fid_)->get_name());
-        }
-        
-        std::ostream &FieldEvaluator::serialize(std::ostream &os) const
-        {
-            os << field_config_->get_field_def(fid_)->get_name();
-            return os;
-        }
-
         common::Value FieldEvaluator::evaluate(docid did, common:: ExecutionContext &context) const
         {
             if (fi_.type_==common::FT_INVALID) {

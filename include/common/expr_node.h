@@ -93,8 +93,7 @@ namespace argos {
             virtual bool is_const() const;
             virtual bool uses_match_info() const;
             virtual common::Value evaluate(docid did, ExecutionContext &context) const;
-            virtual std::string to_string() const;
-            virtual std::ostream &serialize(std::ostream &os) const;
+            virtual std::string to_string_impl() const;
 
             Operator *op;
             oprands_t oprands;

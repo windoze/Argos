@@ -194,6 +194,12 @@ namespace argos{
                 str++;
                 len--;
                 return tok;
+            } else if (c==':') {
+                tok.sz=1;
+                tok.type=TT_COLON;
+                str++;
+                len--;
+                return tok;
             } else if (c=='<') {
                 tok.sz=parse_fpair(str, len, tok.type);
             } else if ((c>='0' && c<='9') || c=='-' || c=='.') {
