@@ -40,10 +40,24 @@ void close_index();
 
 bool init_index(const char *conf, const char *index_dir)
 {
-    if (conf && conf[0] && index_dir && index_dir[0]) {
+    if (!(index_dir && index_dir[0])) {
+        return false;
+    }
+    if (conf && conf[0]) {
+        // Create a new index
         the_index=new Index(conf, index_dir, INDEX_CREATE);
         if(!the_index->is_open())
         {
+            cerr << "Cannot create index at \"" << index_dir << "\"\n";
+            close_index();
+            the_index=0;
+        }
+    } else {
+        // Open existing index
+        the_index=new Index(index_dir);
+        if(!the_index->is_open())
+        {
+            cerr << "Cannot open index at \"" << index_dir << "\"\n";
             close_index();
             the_index=0;
         }
@@ -171,21 +185,13 @@ int main(int argc, const char * argv[])
     string inp;
     if (vm.count("config")) {
         conf=vm["config"].as<string>();
-    } else {
-        conf="./config.xml";
     }
-    
-    int fd=open(conf.c_str(), O_RDONLY);
-    if (fd<0) {
-        cerr << "Cannot access config file.\n";
-        return 100;
-    }
-    close(fd);
     
     if (vm.count("index-dir")) {
         index_dir=vm["index-dir"].as<string>();
     } else {
-        index_dir="./index.db";
+        cerr << "\nIndex path must be specified.\n";
+        return 100;
     }
     
     if (vm.count("input-file")) {
@@ -194,19 +200,26 @@ int main(int argc, const char * argv[])
         inp="-";
     }
     
-    cout << "Building index at \"" << index_dir << "\"...\n";
+    if (conf.empty()) {
+        cout << "Updating index at \"" << index_dir << "\"...\n";
+    } else {
+        cout << "Building index at \"" << index_dir << "\"...\n";
+    }
     
     size_t line_count=0;
     size_t error_count=0;
     try {
         if(!build_index(conf, index_dir, inp, line_count, error_count))
         {
-            cerr << "\nFailed\n";
+            cerr << "\nFailed.\n";
             return 100;
         }
         cout << "\nDone.\n";
-        cout << "Processed " << line_count << " lines, " << error_count << " lines with error\n";
+        cout << line_count << "lines processed, " << error_count << " lines with error\n";
         return 0;
+    }
+    catch(exception &e) {
+        cerr << "\nERROR: " << e.what() << "\n";
     }
     catch(...) {
         cerr << "\nERROR: Uncaught exception.\n";
