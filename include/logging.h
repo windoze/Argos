@@ -9,6 +9,10 @@
 #ifndef Argos_logging_h
 #define Argos_logging_h
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+
 #include <log4cplus/logger.h>
 #include <log4cplus/loggingmacros.h>
 #include <iomanip>

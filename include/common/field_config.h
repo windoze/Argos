@@ -25,7 +25,7 @@ namespace argos {
             FT_DOUBLE   =6,
             FT_GEOLOC   =7,     // 2 floats
             FT_STRING   =8,
-            FT_MULTI    =0x80,
+            FT_MULTI    =0x80
         } FIELD_TYPE;
 
         extern const uint8_t field_sizes[];
@@ -61,7 +61,7 @@ namespace argos {
             // The field should be indexed in reverse index
             FF_INDEX=0x01,
             // The field should be stored in forward index
-            FF_STORE=0x02,
+            FF_STORE=0x02
         } FIELD_FLAG;
 
         /**

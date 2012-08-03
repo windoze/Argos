@@ -6,6 +6,11 @@
 //  Copyright (c) 2012 0d0a.com. All rights reserved.
 //
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+
 #include <iomanip>
 #include <boost/lexical_cast.hpp>
 #include <boost/scoped_ptr.hpp>

@@ -9,6 +9,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+
 namespace argos {
     namespace common {
         void unescape(char *buf, const char *str, size_t len)

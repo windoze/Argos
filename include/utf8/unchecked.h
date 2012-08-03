@@ -30,6 +30,11 @@ DEALINGS IN THE SOFTWARE.
 
 #include "core.h"
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+
 namespace utf8
 {
     namespace unchecked 

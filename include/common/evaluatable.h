@@ -21,7 +21,7 @@ namespace argos {
             ET_CONST=1,
             ET_EXPR=2,
             ET_ATTR=3,
-            ET_DOC=4,
+            ET_DOC=4
         } EVA_TYPE;
         
         class ExecutionContext;

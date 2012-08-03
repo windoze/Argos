@@ -6,6 +6,11 @@
 //  Copyright (c) 2012 0d0a.com. All rights reserved.
 //
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+
 #include <fstream>
 #include <boost/program_options.hpp>
 #include "index.h"
@@ -215,7 +220,7 @@ int main(int argc, const char * argv[])
             return 100;
         }
         cout << "\nDone.\n";
-        cout << line_count << "lines processed, " << error_count << " lines with error\n";
+        cout << line_count << " lines processed, " << error_count << " lines with error\n";
         return 0;
     }
     catch(exception &e) {

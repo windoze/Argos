@@ -214,8 +214,8 @@ namespace argos {
             size_type size_;
             RandomIterator_T first_;
             RandomIterator_T last_;
-            Cmp cmp_;
             bool desc_;
+            Cmp cmp_;
         };
 
         /**

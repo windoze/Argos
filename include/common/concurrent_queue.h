@@ -37,6 +37,7 @@ namespace argos {
             inline bool open() {
                 mutex_type::scoped_lock lock(the_mutex_);
                 opened_=true;
+                return opened_;
             }
             
             inline void close() {

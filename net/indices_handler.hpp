@@ -25,8 +25,8 @@ namespace http {
             
             virtual void handle_request(const request& req, reply& rep);
             
-            std::string xsl_;
             indices_t indices_;
+            std::string xsl_;
             Logger logger;
             Logger acc;
             Logger err;

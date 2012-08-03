@@ -27,7 +27,7 @@ namespace argos {
             VT_DOUBLE,
             VT_GEOLOCATION,
             VT_STRING,
-            VT_ARRAY,
+            VT_ARRAY
         } VALUE_TYPE;
         
         struct Value;

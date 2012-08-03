@@ -5,13 +5,13 @@ Argos has 2 individual programs, indexer and searcher.
 Indexer
 -------
 
-Indexer can build index from source file.
+Indexer can build or update index from source file.
 
 Indexer has following command line arguments:
 
-* `-c|--config`, a config XML file, the format is described in the section 'Config.XML'
-* `-d|--index-dir`, the directory to store index, the directory must *not* inexist, or the indexer fails.
-* `-i|--input-file`, input file name, if it's `-` or missing, indexer reads input data from stdin.
+* `-c|--config`, a config XML file, the format is described in the section 'Config.XML'. Indexer will try to create a new index if this argument exists, otherwise indexer will try to open an existing index at `--index-dir`.
+* `-d|--index-dir`, the directory to store index, the directory must *not* exist if there is a config XML specified.
+* `-i|--input-file`, input file name, indexer reads input data from stdin if the file name is `-` or this argument doesn't appear.
 
 ### Config.XML ###
 
@@ -46,6 +46,8 @@ There are some exceptions from standard CSV format:
 
 * Multi-value field has format `[v1,v2...]`, no quotes, empty field is `[]`.
 * geolocation field has format `<lat,long>`, no quotes.
+
+Indexer simply uses `std::getline()` to read from input file, so the maxium length of each document depends on the compiler and stdc++ lib. It should be ok to handle lines over 1M bytes on most systems.
 
 
 Searcher
@@ -162,9 +164,9 @@ Histogram specification can also be multiple expressions, in such case, the grou
 URL prefix is `/index_name/item`, with following parameters:
 
 * `id`, value is a list of primary keys, seperated by comma `,`.
-* `fl`, same as in Query section.
+* `fl` and `fmt`, same as in Query section.
 
-Number of returned documents always equals to the number specified in `id` parameter, but all values are empty if the document does not actually exist.
+Number of returned documents always equals to the number specified in `id` parameter, and the order is same as the order specified in query. All values are empty if the document does not actually exist.
 
 ### Real-Time Update ###
 

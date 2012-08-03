@@ -10,6 +10,11 @@
 # pragma once
 #endif
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+
 #include "json_spirit_value.h"
 #include "json_spirit_error_position.h"
 

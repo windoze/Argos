@@ -11,6 +11,11 @@
 #ifndef HTTP_SERVER3_SERVER_HPP
 #define HTTP_SERVER3_SERVER_HPP
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+
 #include <boost/asio.hpp>
 #include <string>
 #include <vector>

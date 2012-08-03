@@ -10,6 +10,11 @@
 #include <string.h>
 #include <ctype.h>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+
 namespace argos {
     namespace common {
         inline unsigned char hex_to_char(char c)

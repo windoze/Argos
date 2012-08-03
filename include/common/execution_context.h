@@ -37,8 +37,8 @@ namespace argos {
              * Default constructor
              */
             ExecutionContext()
-            : index()
-            , temp_pool(0)
+            : temp_pool(0)
+            , index()
             , match_info_(0)
             {}
             
@@ -46,8 +46,8 @@ namespace argos {
              * Copy constructor
              */
             ExecutionContext(const ExecutionContext &other)
-            : index(other.index)
-            , temp_pool(other.temp_pool)
+            : temp_pool(other.temp_pool)
+            , index(other.index)
             , match_info_(other.match_info_)
             {}
             

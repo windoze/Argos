@@ -44,7 +44,7 @@ namespace argos {
              * Create MatchParser_impl instance
              */
             MatchParser_impl *create_match_parser_impl();
-        };
+        }
         
         /**
          * Concrate wrapper class for MatchParser_impl

@@ -6,6 +6,11 @@
 //  Copyright (c) 2012 0d0a.com. All rights reserved.
 //
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+
 #include <boost/thread/thread.hpp>
 #include "common/concurrent_queue.h"
 #include "parser.h"
@@ -77,10 +82,10 @@ namespace http {
         
         insert_handler::insert_handler(argos::index::Index* the_index)
         : the_index_(the_index)
+        , idx_name(get_index_name(the_index))
         , the_update_queue_()
         , the_update_thread_proc_(new detail::update_thread_proc(the_update_queue_, the_index))
         , the_update_thread_(*the_update_thread_proc_)
-        , idx_name(get_index_name(the_index))
         , logger(Logger::getInstance("main"))
         , acc(Logger::getInstance(std::string("access.")+idx_name))
         , err(Logger::getInstance(std::string("error.")+idx_name))

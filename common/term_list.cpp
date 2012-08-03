@@ -92,7 +92,7 @@ namespace argos {
         void int_terms(const char *prefix, int64_t v, term_list_t &terms)
         {
             char buf[100];
-            sprintf(buf, "%lld", v);
+            sprintf(buf, "%lld", (long long int)v);
             add_term(prefix, buf, terms);
         }
         

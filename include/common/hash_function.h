@@ -6,6 +6,11 @@
 //  Copyright (c) 2012 0d0a.com. All rights reserved.
 //
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+
 #include <stdint.h>
 
 #ifndef Argos_hash_function_h
@@ -171,7 +176,7 @@ namespace argos {
          * NOTE: key set is likely to be continuous, by rotating LSBits and MSBits, continuous key set is scatterred
          * number of effective bits is *not* reduced, key space remains
          */
-        inline uint64_t hash_function( unsigned long long key)
+        inline uint64_t hash_function( uint64_t key)
         {
             uint64_t hash = (key<<7)+key + ((key >> 28 ) & 0xffff);
             return uint64_t(hash);
