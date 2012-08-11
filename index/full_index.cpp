@@ -208,6 +208,9 @@ namespace argos {
                 return INVALID_DOC;
             }
             docid did=fi_->add_document(vl);
+            if (!is_valid(did)) {
+                return did;
+            }
             if(!ri_->add_document(did, vl, ctx))
             {
                 fi_->delete_document(did);
