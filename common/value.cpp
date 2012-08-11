@@ -125,6 +125,9 @@ namespace argos {
         Value::Value(const value_list_t &vl)
         {
             VALUE_TYPE vt=common_type(vl);
+            if (vl.empty()) {
+                vt=VT_INTEGER;
+            }
             if (vt==VT_EMPTY) {
                 // Clear content
                 number=0;

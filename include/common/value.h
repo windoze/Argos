@@ -162,6 +162,13 @@ namespace argos {
                 geolocation.longitude=v2;
             }
             
+            Value(const std::pair<double, double> &fp)
+            : type_(VT_GEOLOCATION)
+            {
+                geolocation.latitude=fp.first;
+                geolocation.longitude=fp.second;
+            }
+            
             Value(GeoLocationValue v)
             : type_(VT_GEOLOCATION)
             , geolocation(v)
