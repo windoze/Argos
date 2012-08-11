@@ -47,11 +47,15 @@ namespace argos {
         class Query {
         public:
             Query();
+            
+            std::string to_string() const;
 
             bool uses_match_info() const;
             
             const common::field_list_t &get_field_list() const { return fl_; }
 
+            // HACK: Match part
+            std::string match_param_;
             // Output Format
             std::string fmt;
             // Item query

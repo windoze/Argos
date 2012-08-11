@@ -22,160 +22,33 @@
 #include "index/field_evaluator.h"
 #include "query/enquire.h"
 #include "parser.h"
+#include "value_parser.h"
 
 namespace argos {
     namespace parser {
         using namespace common;
         
         common::eva_ptr_t parse_doc_op(const char *&str, size_t &len, common::ExecutionContext &ctx);
-        bool parse_value_list(const char *&str, size_t &len, value_list_t &vl, mem_pool *mp);
-        
-        OFFSET make_array(mem_pool *pool, FIELD_TYPE ft, const char *str, size_t sz)
-        {
-            const char *p=str+1;
-            size_t l=sz-2;
-            ExecutionContext context;
-            context.temp_pool=pool;
-            mpv_allocator mpa;
-            value_list_t vl(mpa);
-            if(!parse_value_list(p, l, vl, pool))
-            {
-//                context.temp_pool=NULL;
-                return INVALID_OFFSET;
-            }
-            size_t arr_sz=array_required_length(ft, vl.size());
-            OFFSET off=pool->allocate(arr_sz);
-            void *buf=pool->get_addr(off);
-            make_array(buf, ft, vl);
-//            context.temp_pool=NULL;
-            return off;
-        }
-        
-        OFFSET make_array(mem_pool *pool, const char *str, size_t sz)
-        {
-            const char *p=str+1;
-            size_t l=sz-2;
-            mpv_allocator mpa;
-            value_list_t vl(mpa);
-            if(!parse_value_list(p, l, vl, pool))
-            {
-                return INVALID_OFFSET;
-            }
-            FIELD_TYPE ft=FT_INT64;
-            if (vl.size()>0) {
-                VALUE_TYPE vt=common_type(vl);
-                if (vt==VT_DOUBLE) {
-                    ft=FT_DOUBLE;
-                } else if (vt==VT_INTEGER) {
-                    ft=FT_INT64;
-                } else if (vt==VT_GEOLOCATION) {
-                    ft=FT_GEOLOC;
-                } else {
-                    return INVALID_OFFSET;
-                }
-            }
-            
-            size_t arr_sz=array_required_length(ft, vl.size());
-            OFFSET off=pool->allocate(arr_sz);
-            void *buf=pool->get_addr(off);
-            make_array(buf, ft, vl);
-            return off;
-        }
-
-        Value parse_array(const char *str, size_t sz, mem_pool *mp)
-        {
-            OFFSET off=make_array(mp, str, sz);
-            if (off==INVALID_OFFSET) {
-                return Value();
-            }
-            Value ret;
-            ret.type_=VT_ARRAY;
-            ret.array.data=(int8_t *)(mp->get_addr(off));
-            return ret;
-        }
-        
-        Value parse_string(const char *str, size_t sz, mem_pool *mp)
-        {
-            OFFSET off=mp->allocate(sz-1);  // Trailing '\0'
-            char *p=(char *)(mp->get_addr(off));
-            unescape(p, str, sz);
-            //OFFSET off=mp->add_string(str+1, sz-2);
-            if (off==INVALID_OFFSET) {
-                return Value();
-            }
-            Value ret;
-            ret.type_=VT_STRING;
-            ret.string=(char *)(mp->get_addr(off));
-            return ret;
-        }
-        
-        Value parse_geoloc(const char *str, size_t sz)
-        {
-            Value ret;
-            str++;
-            sz-=2;
-            token tf=next_token(str, sz);
-            if ((tf.type!=TT_FLOAT) && (tf.type!=TT_INT)) {
-                return ret;
-            }
-            double lat=::atof(tf.p);
-            tf=next_token(str, sz);
-            if (tf.type!=TT_COMMA) {
-                return ret;
-            }
-            tf=next_token(str, sz);
-            if ((tf.type!=TT_FLOAT) && (tf.type!=TT_INT)) {
-                return ret;
-            }
-            double lng=::atof(tf.p);
-            return Value(lat, lng);
-        }
-        
-        bool parse_value_list(const char *&str, size_t &len, value_list_t &vl, mem_pool *mp)
-        {
-            int i=0;
-            while(len>0) {
-                token t=next_token(str, len);
-                Value v;
-                switch (t.type) {
-                    case TT_INT:
-                        v=Value(int64_t(atoll(t.p)));
-                        break;
-                    case TT_FLOAT:
-                        v=Value(::atof(t.p));
-                        break;
-                    case TT_FPAIR:
-                        v=parse_geoloc(t.p, t.sz);
-                        break;
-                    case TT_STR:
-                        v=parse_string(t.p, t.sz, mp);
-                        break;
-                    case TT_ARRAY:
-                        v=parse_array(t.p, t.sz, mp);
-                        break;
-                    default:
-                        return false;
-                        break;
-                }
-                if (v.empty()) {
-                    return false;
-                }
-                vl.push_back(v);
-                
-                if (len>0) {
-                    t=next_token(str, len);
-                    if (t.type!=TT_COMMA) {
-                        return false;
-                    }
-                }
-                i++;
-            }
-            return true;
-        }
-
         bool parse_value_list(const char *&str, size_t &len, value_list_t &vl, ExecutionContext &context)
         {
-            return parse_value_list(str, len, vl, context.temp_pool);
+            const char *first=str;
+            const char *last=str+len;
+            value_list_parser<const char*> parser;
+            boost::spirit::ascii::space_type space;
+            bool ret=boost::spirit::qi::phrase_parse(first, last, parser, space, vl);
+            if(ret) {
+                str=str+len;
+                len=0;
+            }
+            return ret;
+        }
+
+        template<typename Iterator>
+        inline bool parse_value(Iterator first, Iterator last, Value &v)
+        {
+            value_parser<Iterator> parser;
+            boost::spirit::ascii::space_type space;
+            return boost::spirit::qi::phrase_parse(first, last, parser, space, v);
         }
         
         bool parse_expr_list(const char *&str, size_t &len, oprands_t &oprands, ExecutionContext &context)
@@ -230,37 +103,19 @@ namespace argos {
             token t=next_token(str, len);
             switch (t.type) {
                 case TT_INT:
-                    // Return const
-                    // TODO: ensure t.sz size constraints
-                    // TODO: Use mem_pool_allocator
-                    return eva_ptr_t(new Constant(Value(int64_t(atoll(t.p)))));
                 case TT_FLOAT:
-                    // Return const
-                    // TODO: ensure t.sz size constraints
-                    // TODO: Use mem_pool_allocator
-                    return eva_ptr_t(new Constant(Value(::atof(t.p))));
                 case TT_FPAIR:
+                case TT_STR:
+                case TT_ARRAY:
                     // Return const
                     // TODO: ensure t.sz size constraints
                     // TODO: Use mem_pool_allocator
-                    return eva_ptr_t(new Constant(parse_geoloc(t.p, t.sz)));
-                case TT_STR:
-                    // Return const
                 {
-                    Value v=parse_string(t.p, t.sz, context.temp_pool);
-                    if (v.empty()) {
-                        return eva_ptr_t();
+                    Value v;
+                    if(parse_value(t.p, t.p+t.sz, v)) {
+                        return eva_ptr_t(new Constant(v));
                     }
-                    return eva_ptr_t(new Constant(v));
-                }
-                case TT_ARRAY:
-                {
-                    //OFFSET off=make_array(context.temp_pool, t.p, t.sz);
-                    Value v=parse_array(t.p, t.sz, context.temp_pool);
-                    if (v.empty()) {
-                        return eva_ptr_t();
-                    }
-                    return eva_ptr_t(new Constant(v));
+                    throw argos_syntax_error("Syntax error in expression");
                 }
                 case TT_AT:
                 {
@@ -430,82 +285,6 @@ namespace argos {
             return true;
         }
 
-        bool parse_query(const char *match,
-                         const char *filter,
-                         const char *sort_crit,
-                         const char *histos,
-                         const char *nr,
-                         const char *sk,
-                         const char *field_list,
-                         query::Query &q,
-                         common::ExecutionContext &context)
-        {
-            size_t len;
-            
-            if (match && match[0]) {
-                len=strlen(match);
-                if (len==1 && match[0]=='*') {
-                    // '*' to do full table scan
-                    q.match_=query::match_ptr_t(new query::MatchAll);
-                } else {
-                    q.match_=MatchParser().parse(match, len, context);
-                    if (!q.match_) {
-                        return false;
-                    }
-                }
-            } else {
-                // No match
-                q.match_=query::match_ptr_t(new query::MatchNone);
-            }
-
-            if (!(filter && filter[0])) {
-                filter="1";
-            }
-            len=strlen(filter);
-            q.filter_=parse_expr(filter, len, context);
-            if (!q.filter_) {
-                return false;
-            }
-            
-            if (!(sort_crit && sort_crit[0])) {
-                // Default order by _id
-                sort_crit="_id,ASC";
-            }
-            len=strlen(sort_crit);
-            if(!parse_sort_crit(sort_crit, len, q.sort_crit_, context)) {
-                return false;
-            }
-            
-            if (histos && histos[0]) {
-                len=strlen(histos);
-                if(!parse_groups(sort_crit, len, q.histos_, context)) {
-                    return false;
-                }
-            }
-            
-            if (nr && nr[0]) {
-                q.nr_=::atoi(nr);
-            } else {
-                // Default result set size is 15
-                q.nr_=15;
-            }
-
-            if (sk && sk[0]) {
-                q.sk_=::atoi(sk);
-            } else {
-                // Default skip 0
-                q.sk_=0;
-            }
-
-            if (!(field_list && field_list[0])) {
-                // Default returns primary key
-                field_list="_id";
-            }
-            q.fl_.clear();
-            len=strlen(field_list);
-            return parse_field_list(field_list, len, q.fl_, context);
-        }
-        
         bool parse_query(const char *fmt, size_t fmt_len,
                          const char *match, size_t match_len,
                          const char *filter, size_t filter_len,
@@ -543,6 +322,10 @@ namespace argos {
                         return false;
                     }
                 }
+                // We record origin match param here as the match is parsed and analysed via
+                // specified analyzers and it's not easy to be assembled.
+                // This param is only recorded *after* a successful parse so errors are detected
+                q.match_param_.assign(match, match_len);
             } else {
                 // No match
                 q.match_=query::match_ptr_t(new query::MatchNone);
