@@ -57,7 +57,7 @@ namespace argos {
                 ;
                 
                 simple_value = real
-                             | boost::spirit::long_long
+                             | i64
                              | geo_location
                 ;
                 
@@ -71,6 +71,10 @@ namespace argos {
                 //BOOST_SPIRIT_DEBUG_NODE(array);
             }
             
+            // NOTE: Clang and GCC have different int64_t definitions, GCC uses `long`, Clang uses `long long`
+            // Uses boost::spirit::long_long will cause GCC fail to compile due to ambiguous conversion
+            // And uses boost::spirit::long_ will mess Clang, WTF
+            boost::spirit::qi::int_parser<int64_t> i64;
             boost::spirit::qi::rule<Iterator, common::Value(), boost::spirit::ascii::space_type> value;
             boost::spirit::qi::rule<Iterator, common::Value(), boost::spirit::ascii::space_type> simple_value;
             boost::spirit::qi::rule<Iterator, common::Value(), boost::spirit::ascii::space_type> geo_location;

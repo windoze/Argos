@@ -31,16 +31,9 @@ namespace argos {
         common::eva_ptr_t parse_doc_op(const char *&str, size_t &len, common::ExecutionContext &ctx);
         bool parse_value_list(const char *&str, size_t &len, value_list_t &vl, ExecutionContext &context)
         {
-            const char *first=str;
-            const char *last=str+len;
             value_list_parser<const char*> parser;
             boost::spirit::ascii::space_type space;
-            bool ret=boost::spirit::qi::phrase_parse(first, last, parser, space, vl);
-            if(ret) {
-                str=str+len;
-                len=0;
-            }
-            return ret;
+            return boost::spirit::qi::phrase_parse(str, str+len, parser, space, vl);
         }
 
         template<typename Iterator>
