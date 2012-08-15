@@ -10,6 +10,7 @@
 #include "query/enquire.h"
 #include "serialization.h"
 #include "../json_spirit/json_spirit.h"
+#include "search_result.pb.h"
 
 namespace argos {
     namespace serialization {
@@ -22,6 +23,65 @@ namespace argos {
          // TODO: Protocol Buffer, Avro
          */
         namespace detail {
+            void pbconv(common::Value v, pb::Value &value) {
+                pb::GeoLoc *loc = NULL;
+                switch(v.type_) {
+                    case common::VT_EMPTY:
+                        value.set_type(pb::Value::EMPTY);
+                        break;
+                    case common::VT_INTEGER:
+                        value.set_type(pb::Value::INT);
+                        value.set_ivalue(v.number);
+                        break;
+                    case common::VT_DOUBLE:
+                        value.set_type(pb::Value::DOUBLE);
+                        value.set_dvalue(v.dnumber);
+                        break;
+                    case common::VT_GEOLOCATION:
+                        value.set_type(pb::Value::GEOLOC);
+                        loc = value.mutable_geoloc();
+                        loc->set_lng(v.geolocation.longitude);
+                        loc->set_lat(v.geolocation.latitude);
+                        break;
+                    case common::VT_STRING:
+                        value.set_type(pb::Value::STRING);
+                        value.set_svalue(v.string);
+                        break;
+                    case common::VT_ARRAY:
+                    {
+                        common::ArrayValue arrvalue = v.array;
+                        size_t size = arrvalue.size();
+                        for(size_t i=0; i<size; i++)
+                        {
+                            common::Value element = arrvalue.get_element(i);
+                            switch(element.type_)
+                            {
+                                case common::VT_INTEGER:
+                                    value.set_type(pb::Value::INTARR);
+                                    value.add_ivalues(element.number);
+                                    break;
+                                case common::VT_DOUBLE:
+                                    value.set_type(pb::Value::DOUBLEARR);
+                                    value.add_dvalues(element.dnumber);
+                                    break;
+                                case common::VT_GEOLOCATION:
+                                    value.set_type(pb::Value::GEOLOCARR);
+                                    loc = value.add_geolocs();
+                                    loc->set_lng(element.geolocation.longitude);
+                                    loc->set_lat(element.geolocation.latitude);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+
             json_spirit::Value conv(common::Value v) {
                 json_spirit::Value jv;
                 switch (v.type_) {
@@ -365,6 +425,64 @@ namespace argos {
                 }
             };
             
+            class rs_impl_PB: public rs_impl {
+            public:
+                rs_impl_PB(){}
+                virtual int rs_id() const { return RS_PB; }
+                virtual const char *content_type() const { return "application/pb"; }
+                virtual std::ostream &serialize_prolog(std::ostream &os, const common::field_list_t &schema, 
+                        size_t total_hits, size_t nr) const
+                {
+                    search_result_.set_status(pb::SearchResult::STATUS_OK);
+                    search_result_.set_total(total_hits);
+                    search_result_.set_returned(nr);
+                    search_result_.set_time_used(0);
+                    
+                    for (size_t i=0; i<schema.size(); i++) {
+                        search_result_.add_fields(schema[i]->to_string());
+                    }
+                    return os;
+                }
+                virtual std::ostream &serialize_histos(std::ostream &os, const std::vector<common::field_list_t> &hschema, 
+                        const query::histograms_t &histos) const {
+                    for (size_t i=0; i<histos.size(); i++) {
+                        pb::Histo *histo = search_result_.add_histos();
+                        histo->set_field(serialize_field_list(hschema[i]));
+                        histo->set_count(histos[i].size());
+                        for (query::histogram_t::const_iterator j=histos[i].begin(); j!=histos[i].end(); ++j) {
+                            pb::Histo::Pair *pair = histo->add_pairs();
+                            pb::Value *key = pair->mutable_key();
+                            pbconv((j->first)[0], *key);
+                            pair->set_count(j->second);
+                        }
+                    }
+                    return os;
+                }
+                virtual std::ostream &serialize_doc(std::ostream &os, const common::field_list_t &schema, 
+                        const common::value_list_t &vl) const
+                {
+                    pb::Document *doc = search_result_.add_documents();
+                    for (size_t i=0; i<vl.size(); i++) {
+                        pb::Value *value = doc->add_values();
+                        pbconv(vl[i], *value);
+                    }
+                    return os;
+                }
+                virtual std::ostream &serialize_splitter(std::ostream &os, const common::field_list_t &schema, bool last) const
+                {
+                    //os << '\n';
+                    return os;
+                }
+                virtual std::ostream &serialize_epilog(std::ostream &os, const common::field_list_t &schema, 
+                        size_t total_hits, size_t nr) const
+                {
+                    search_result_.SerializeToOstream(&os);
+                    return os;
+                }
+
+                mutable pb::SearchResult search_result_;
+            };
+
             rs_ptr create_rs(const char *fmtname)
             {
                 if (strcasecmp(fmtname, "CSV")==0) {
@@ -375,6 +493,8 @@ namespace argos {
                     return rs_ptr(new detail::rs_impl_JSON_map);
                 } else if (strcasecmp(fmtname, "XML")==0) {
                     return rs_ptr(new detail::rs_impl_XML);
+                } else if (strcasecmp(fmtname, "PB")==0) {
+                    return rs_ptr(new detail::rs_impl_PB);
                 }
                 // default to CSV
                 return rs_ptr(new detail::rs_impl_CSV);
@@ -390,6 +510,8 @@ namespace argos {
                         return rs_ptr(new detail::rs_impl_XML);
                     case RS_CSV:
                         return rs_ptr(new detail::rs_impl_CSV);
+                    case RS_PB:
+                        return rs_ptr(new detail::rs_impl_PB);
                     default:
                         // TODO: Error log
                         break;

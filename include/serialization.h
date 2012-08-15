@@ -18,6 +18,7 @@ namespace argos {
         const int RS_JSON_MAP=1;
         const int RS_XML=2;
         const int RS_CSV=3;
+        const int RS_PB=4;
         
         namespace detail {
             class rs_impl;
