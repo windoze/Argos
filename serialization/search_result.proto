@@ -1,0 +1,69 @@
+package pb;
+
+/**
+ *  search result
+ */
+message SearchResult {
+    enum Status {
+        STATUS_OK       = 0;
+        STATUS_ERR      = 1;
+    }
+
+    required Status     status      = 1;
+    optional int32      total       = 2;
+    optional int32      returned    = 3;
+    optional int32      time_used   = 4;
+    repeated Histo      histos      = 5;
+	repeated string		fields		= 6;
+	repeated Document	documents	= 7;
+}
+
+/**
+ * statistic result
+ * key with multiple field not supported
+ */
+message Histo {
+    message Pair {
+        required Value  key     = 1;
+        required int32  count   = 2;
+    }
+
+    required string     field   = 1;
+    required int32      count   = 2; 
+    repeated Pair       pairs   = 3;
+}
+
+message GeoLoc {
+    required float  lng = 1;
+    required float  lat = 2;
+}
+
+/**
+ * var type value, multi string not supported
+ */
+message Value {
+    enum Type {
+        EMPTY   = 0;
+        STRING  = 1;
+        INT		= 2;
+        DOUBLE  = 3;
+        GEOLOC  = 4;
+        INTARR	= 5;
+        DOUBLEARR = 6;
+        GEOLOCARR = 7;
+    }
+    required Type   type    = 1;
+    optional string svalue  = 2;
+    optional int64  ivalue  = 3;
+    optional double dvalue  = 4;
+    optional GeoLoc geoloc  = 5;
+
+    repeated int64  ivalues = 6;
+    repeated double dvalues = 7;
+    repeated GeoLoc geolocs = 8;
+}
+
+message Document {
+    repeated Value  values = 1;    
+}
+
