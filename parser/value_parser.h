@@ -8,6 +8,7 @@
 
 //#define BOOST_SPIRIT_DEBUG
 
+#include <boost/fusion/include/std_pair.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include "common/value.h"
 
@@ -61,11 +62,12 @@ namespace argos {
                              | geo_location
                 ;
                 
-                geo_location = '<' >> boost::spirit::double_ >> ',' >> boost::spirit::double_ >> '>';
+                geo_location = '<' >> boost::spirit::double_ >> ',' >> boost::spirit::double_ >> '>'
+                ;
                 
                 // We don't allow embedded array/string
                 array %= '[' >> simple_value % ',' >> ']'
-                       | boost::spirit::lit("[]");
+                       | boost::spirit::lit('[') >> boost::spirit::lit(']');
                 ;
                 
                 //BOOST_SPIRIT_DEBUG_NODE(array);
@@ -77,7 +79,7 @@ namespace argos {
             boost::spirit::qi::int_parser<int64_t> i64;
             boost::spirit::qi::rule<Iterator, common::Value(), boost::spirit::ascii::space_type> value;
             boost::spirit::qi::rule<Iterator, common::Value(), boost::spirit::ascii::space_type> simple_value;
-            boost::spirit::qi::rule<Iterator, common::Value(), boost::spirit::ascii::space_type> geo_location;
+            boost::spirit::qi::rule<Iterator, std::pair<double, double>(), boost::spirit::ascii::space_type> geo_location;
             boost::spirit::qi::rule<Iterator, common::value_list_t(), boost::spirit::ascii::space_type> array;
             boost::spirit::qi::rule<Iterator, common::value_list_t(), boost::spirit::ascii::space_type> empty_array;
             esc_string_parser<Iterator> string_;
