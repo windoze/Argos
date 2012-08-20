@@ -10,6 +10,7 @@
 #include "query/enquire.h"
 #include "serialization.h"
 #include "../json_spirit/json_spirit.h"
+#include "result.pb.h"
 
 namespace argos {
     namespace serialization {
@@ -119,6 +120,106 @@ namespace argos {
                 virtual std::ostream &serialize_epilog(std::ostream &os, const common::field_list_t &schema, size_t total_hits, size_t nr) const=0;
             };
 
+            class rs_impl_ProtoBuf : public rs_impl {
+            public:
+                rs_impl_ProtoBuf(){}
+                virtual int rs_id() const { return RS_PROTOBUF; }
+                virtual const char *content_type() const { return "application/x-protobuf"; }
+                virtual std::ostream &serialize_prolog(std::ostream &os, const common::field_list_t &schema, size_t total_hits, size_t nr) const{
+                    protobuf::Schema *s=result_.mutable_schema();
+                    for (size_t i=0; i<schema.size(); i++) {
+                        s->add_field(schema[i]->to_string());
+                    }
+                    return os;
+                }
+                virtual std::ostream &serialize_histos(std::ostream &os, const std::vector<common::field_list_t> &hschema, const query::histograms_t &histos) const {
+                    for (int i=0; i<hschema.size(); i++) {
+                        protobuf::Histogram *h=result_.mutable_histograms()->add_histogram();
+                        h->set_name(serialize_field_list(hschema[i]));
+                        for (query::histogram_t::const_iterator j=histos[i].begin(); j!=histos[i].end(); ++j) {
+                            protobuf::Histogram_Entry *e=h->add_entry();
+                            for(common::value_list_t::const_iterator k=j->first.begin(); k!=j->first.end(); ++k) {
+                                conv(*k, e->add_key());
+                            }
+                            e->set_count(j->second);
+                        }
+                    }
+                    return os;
+                }
+                virtual std::ostream &serialize_doc(std::ostream &os, const common::field_list_t &schema, const common::value_list_t &vl) const {
+                    protobuf::Document *doc=result_.add_document();
+                    for (size_t i=0; i<vl.size(); i++) {
+                        conv(vl[i], doc->add_field());
+                    }
+                    return os;
+                }
+                virtual std::ostream &serialize_splitter(std::ostream &os, const common::field_list_t &schema, bool last) const {
+                    return os;
+                }
+                virtual std::ostream &serialize_epilog(std::ostream &os, const common::field_list_t &schema, size_t total_hits, size_t nr) const {
+                    result_.set_total(total_hits);
+                    result_.set_returned(nr);
+                    result_.SerializeToOstream(&os);
+                    return os;
+                }
+                
+            private:
+                inline void conv(common::Value v, protobuf::Value *p) const {
+                    switch (v.type_) {
+                        case common::VT_INTEGER:
+                            p->set_number(v.number);
+                            break;
+                        case common::VT_DOUBLE:
+                            p->set_dnumber(v.dnumber);
+                            break;
+                        case common::VT_STRING:
+                            p->set_str(v.string);
+                            break;
+                        case common::VT_GEOLOCATION:
+                        {
+                            protobuf::GeoLocation *gl=p->mutable_geoloc();
+                            gl->set_latitude(v.geolocation.latitude);
+                            gl->set_longitude(v.geolocation.longitude);
+                        }
+                            break;
+                        case common::VT_ARRAY:
+                        {
+                            protobuf::Array *arr=p->mutable_array();
+                            switch (v.array.field_type()) {
+                                case common::FT_INT8:
+                                case common::FT_INT16:
+                                case common::FT_INT32:
+                                case common::FT_INT64:
+                                    for (int i=0; i<v.array.size(); i++) {
+                                        arr->add_element()->set_number(v.array.get_element(i).number);
+                                    }
+                                    break;
+                                case common::FT_FLOAT:
+                                case common::FT_DOUBLE:
+                                    for (int i=0; i<v.array.size(); i++) {
+                                        arr->add_element()->set_dnumber(v.array.get_element(i).dnumber);
+                                    }
+                                    break;
+                                case common::FT_GEOLOC:
+                                    for (int i=0; i<v.array.size(); i++) {
+                                        protobuf::GeoLocation *gl=arr->add_element()->mutable_geoloc();
+                                        common::Value e=v.array.get_element(i);
+                                        gl->set_latitude(e.geolocation.latitude);
+                                        gl->set_longitude(e.geolocation.longitude);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                
+                mutable protobuf::Result result_;
+            };
             class rs_impl_JSON_array : public rs_impl {
             public:
                 rs_impl_JSON_array(){}
@@ -375,6 +476,8 @@ namespace argos {
                     return rs_ptr(new detail::rs_impl_JSON_map);
                 } else if (strcasecmp(fmtname, "XML")==0) {
                     return rs_ptr(new detail::rs_impl_XML);
+                } else if (strcasecmp(fmtname, "PB")==0) {
+                    return rs_ptr(new detail::rs_impl_ProtoBuf);
                 }
                 // default to CSV
                 return rs_ptr(new detail::rs_impl_CSV);
@@ -390,6 +493,8 @@ namespace argos {
                         return rs_ptr(new detail::rs_impl_XML);
                     case RS_CSV:
                         return rs_ptr(new detail::rs_impl_CSV);
+                    case RS_PROTOBUF:
+                        return rs_ptr(new detail::rs_impl_ProtoBuf);
                     default:
                         // TODO: Error log
                         break;

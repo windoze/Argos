@@ -1,0 +1,44 @@
+package argos.serialization.protobuf;
+message GeoLocation {
+	required float latitude=1;
+	required float longitude=2;
+}
+message Array {
+	message SimpleValue {
+		optional int64 number=1;
+		optional double dnumber=2;
+		optional GeoLocation geoloc=3;
+	}
+	repeated SimpleValue element=1;
+}
+message Value {
+	optional int64 number=1;
+	optional double dnumber=2;
+	optional GeoLocation geoloc=3;
+	optional string str=4;
+	optional Array array=5;
+}
+message Histogram {
+	message Entry {
+		repeated Value key=1;
+		required uint32 count=2;
+	}
+    required string name=1;
+	repeated Entry entry=2;
+}
+message Histograms {
+	repeated Histogram histogram=1;
+}
+message Document {
+	repeated Value field=1;
+}
+message Schema {
+	repeated string field=1;
+}
+message Result {
+    required uint32 total=1;
+    required uint32 returned=2;
+	required Schema schema=3;
+	repeated Document document=4;
+	optional Histograms histograms=5;
+}
