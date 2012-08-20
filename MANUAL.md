@@ -158,6 +158,7 @@ Histogram specification can also be multiple expressions, in such case, the grou
 * `jsona`, outputs a JSON file, each document in the result is an array, no field names are returned.
 * `jsonm`, outputs a JSON file, each document in the result is a map, with field names.
 * `csv`, a CSV-like format used by indexer and searcher, not all info is returned, for test only.
+* `pb`, Google ProtocolBuffers, the `.proto` file is at `Argos/serialization/result/proto`.
 
 ### Query by Primary Key ###
 

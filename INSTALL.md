@@ -10,6 +10,7 @@ Pre-requests
 * [CMake](www.cmake.org), version 2.8 or higher
 * [ICU](icu-project.org), version 4.8 or higher
 * [Log4cplus](log4cplus.sf.net), version 1.0.4.1
+* [ProtoBuf](https://developers.google.com/protocol-buffers), version 2.4 or higher
 
 Installation
 ------------

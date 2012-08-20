@@ -96,9 +96,7 @@ Long term, low priority
 
 * More serializers
 
-    I'm thinking about Avaro, ProtocolBuffer, and BSON, still have no time to look into details, but I think these should not be too hard to implement.
-
-    Also communications between searcher and aggregator need a binary serializer.
+    Now we have ProtocolBuffers, can support other formats such as Avaro, MsgPack, and BSON, still have no time to look into details, but I think these should not be too hard to implement.
 
 * Network protocol other than HTTP
 
