@@ -79,6 +79,7 @@ namespace argos {
         template<typename T>
         struct offptr_t {
             typedef offptr_t<T> this_t;
+            typedef T element_type;
             
             offptr_t()
             : pool(0), offset(INVALID_OFFSET)

@@ -8,6 +8,9 @@
 
 #include <memory>
 #include <string>
+#if __cplusplus>=201103L
+#   include <type_traits>
+#endif
 #include "common/mem_pool.h"
 
 #ifndef Argos_mem_pool_allocator_h
@@ -101,10 +104,19 @@ namespace argos {
             inline void free(char *p) {
                 // Do nothing
             }
-            
-            inline bool operator==(const this_t& a) const { return pool==a.pool; }
-            inline bool operator!=(const this_t& a) const { return !operator==(a); }
-            
+
+            template<typename U>
+            inline bool operator==(const mem_pool_allocator<U> & a) const { return pool==a.pool; }
+
+            template<typename U>
+            inline bool operator!=(const mem_pool_allocator<U> & a) const { return !operator==(a); }
+
+#if __cplusplus>=201103L
+            // This allocator does need to be propagated on copy/move/swap
+            typedef std::true_type propagate_on_container_copy_assignment;
+            typedef std::true_type propagate_on_container_move_assignment;
+            typedef std::true_type propagate_on_container_swap;
+#endif
             mem_pool *pool;
         };
         
