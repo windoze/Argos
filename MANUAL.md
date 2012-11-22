@@ -116,6 +116,7 @@ Expression syntax is in prefix form, following functions are supported:
 * `AT(array,idx)`, returns `array[idx]`
 * `FIND(array,element)`, returns the index of element in array
 * `DIST(geoloc1,geoloc2)`, returns spherical distance between geoloc1 and geoloc2 in meter, using radius of Earth.
+* `MINDIST(geoloc1,[geoloc2,...])`, returns the nearest spherical distance between geoloc1 and all geolocations in the second parameter, which must be an array of gelocations.
 * `RANGE(v,anchor1,anchor2,...anchorn)`, return `n` if `v` in `[anchorn, anchorn+1)`
 * Document specific operators, start with '@'
     + `@DOCCOUNT`, returns number of documents in the index
