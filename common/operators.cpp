@@ -654,7 +654,7 @@ namespace argos {
             public:
                 virtual const char *get_name() const { return "DIST"; }
                 virtual bool validate_arity(size_t arity) const { return (arity==2) || (arity==4); }
-                virtual bool const_foldable() const { return false; }
+                virtual bool const_foldable() const { return true; }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     double lat1,long1,lat2,long2;
                     // We have either 4 oprands or 2 oprands
@@ -678,6 +678,48 @@ namespace argos {
                         }
                     }
                     return Value(dist(lat1, long1, lat2, long2));
+                }
+            };
+            /**
+             * MINDIST(<lat1, long1>, [<lat2, long2>, ... ])
+             *
+             * Return min distance between a point and an array of points
+             */
+            class MinDistOp : public Operator {
+            public:
+                virtual const char *get_name() const { return "MINDIST"; }
+                virtual bool validate_arity(size_t arity) const { return (arity==2); }
+                virtual bool const_foldable() const { return true; }
+                virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
+                    // We have at exact 2 oprands
+                    // First one must be convertible to geolocation
+                    Value v1=oprands[0]->evaluate(did, context).cast(VT_GEOLOCATION);
+                    if (v1.empty()) {
+                        return Value();
+                    }
+                    // Second one must be a non-empty array of geolocations
+                    Value v2=oprands[1]->evaluate(did, context);
+                    if (v2.type_!=VT_ARRAY) {
+                        return Value();
+                    }
+                    if (v2.array.size()<=0) {
+                        return Value();
+                    }
+                    if (v2.array.field_type()!=FT_GEOLOC) {
+                        return Value();
+                    }
+                    // 400000km is far enough, on the planet Earth.
+                    double min_dist=40000*1000*10;
+                    for (size_t i=0; i<v2.array.size(); i++) {
+                        double d=dist(v1.geolocation.latitude,
+                                      v1.geolocation.longitude,
+                                      v2.array.get_element(i).geolocation.latitude,
+                                      v2.array.get_element(i).geolocation.longitude);
+                        if (d<min_dist) {
+                            min_dist=d;
+                        }
+                    }
+                    return Value(min_dist);
                 }
             };
             /**
@@ -842,6 +884,7 @@ namespace argos {
             add_operator(new operators::LngOp);
             add_operator(new operators::GeoLocOp);
             add_operator(new operators::DistOp);
+            add_operator(new operators::MinDistOp);
             add_operator(new operators::MinOp);
             add_operator(new operators::MaxOp);
             add_operator(new operators::RegexOp);
