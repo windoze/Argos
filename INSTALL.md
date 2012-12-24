@@ -15,5 +15,39 @@ Pre-requests
 Installation
 ------------
 1. Make sure all pre-requests are installed and working properly
-2. Run `cmake -C PATH/to/Argos` in build directory
+
+    1. Mac OS X
+
+        1. Install Xcode from [AppStore](https://itunes.apple.com/us/app/xcode/id497799835)
+
+        2. Install Xcode command line tools, which can be downloaded within Xcode app, or from [Apple Developer Connection site](https://developer.apple.com/downloads/)
+
+        3. Install [MacPorts](www.macports.org/install.php)
+
+        4. Install Boost, ICU, Log4CPlus, and ProtoBuf from MacPorts
+
+            `sudo port install boost cmake icu log4cplus protobuf-cpp`
+
+        5. Build 'Argos.xcodeproj' with Xcode
+
+        [Homebrew](https://github.com/mxcl/homebrew) may work but not tested.
+
+    2. Ubuntu/Debian
+    
+        Recent releases(since Oct 2012) have new version of dependent packages and should work out-of-the-box.
+
+    3. CentOS/RHEL
+        
+        These distributions ship very old versions of Boost and Log4CPlus, which are not tested.
+    
+        You need to download and install up-to-date versions by yourself.
+    
+    4. On FreeBSD, you'll need Clang instead of the aged GCC 4.2, therefor you need to compile and install all dependencies by hand.
+    
+        Ports cannot be used as they are still using GCC.
+    
+        FreeBSD migrated default compiler to Clang in 9-CURRENT recently, but the port status are unclear.
+
+2. Run `cmake -DCMAKE_BUILD_TYPE=[Release|Debug] PATH/to/Argos` in build directory
+
 3. Run `make` in build directory
