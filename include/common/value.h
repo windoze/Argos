@@ -30,6 +30,28 @@ namespace argos {
             VT_ARRAY
         } VALUE_TYPE;
         
+        inline VALUE_TYPE to_value_type(FIELD_TYPE ft) {
+            if (ft & FT_MULTI) {
+                return VT_ARRAY;
+            }
+            switch (ft) {
+                case FT_INT8:
+                case FT_INT16:
+                case FT_INT32:
+                case FT_INT64:
+                    return VT_INTEGER;
+                case FT_FLOAT:
+                case FT_DOUBLE:
+                    return VT_DOUBLE;
+                case FT_GEOLOC:
+                    return VT_GEOLOCATION;
+                case FT_STRING:
+                    return VT_STRING;
+                default:
+                    return VT_EMPTY;
+            }
+        }
+        
         struct Value;
         
         struct ArrayValue {
