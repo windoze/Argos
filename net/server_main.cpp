@@ -36,39 +36,54 @@ void run_server(const indices_t &indices,
 {
     Logger logger = Logger::getInstance("main");
 
-    http::server::url_handler *h=new http::server::static_url_handler(doc_root);
-    http::server::register_url_handler("/", h);
+    {
+        // Static handler must be the first one, will be checked last
+        http::server::url_handler_ptr h(new http::server::static_url_handler(doc_root));
+        http::server::register_url_handler("/", h);
+    }
     
-    h=new http::server::indices_handler(indices);
-    http::server::register_url_handler("/indices.xml", h);
+    {
+        http::server::url_handler_ptr h(new http::server::indices_handler(indices));
+        http::server::register_url_handler("/indices.xml", h);
+    }
 
     int n=0;
     for (indices_t::const_iterator i=indices.begin(); i!=indices.end(); ++i) {
         std::string s=i->first;
         s='/'+s;
         
-        h=new http::server::query_handler(i->second.get());
-        http::server::register_url_handler(s + "/query", h);
-        if (n==0) {
-            http::server::register_url_handler("/query", h);
+        {
+            http::server::url_handler_ptr h(new http::server::query_handler(i->second.get()));
+            http::server::register_url_handler(s + "/query", h);
+            if (n==0) {
+                http::server::register_url_handler("/query", h);
+            }
         }
         
-        h=new http::server::item_handler(i->second.get());
-        http::server::register_url_handler(s + "/item", h);
-        if (n==0) {
-            http::server::register_url_handler("/item", h);
+        {
+            http::server::url_handler_ptr h(new http::server::item_handler(i->second.get()));
+            http::server::register_url_handler(s + "/item", h);
+            if (n==0) {
+                http::server::register_url_handler("/item", h);
+            }
         }
         
-        h=new http::server::insert_handler(i->second.get());
-        http::server::register_url_handler(s + "/insert", h);
-        if (n==0) {
-            http::server::register_url_handler("/insert", h);
+        {
+            http::server::url_handler_ptr h(new http::server::insert_handler(i->second.get()));
+            http::server::register_url_handler(s + "/insert", h);
+            http::server::register_url_handler(s + "/update", h);
+            if (n==0) {
+                http::server::register_url_handler("/insert", h);
+                http::server::register_url_handler("/update", h);
+            }
         }
         
-        h=new http::server::config_handler(i->second.get());
-        http::server::register_url_handler(s + "/config.xml", h);
-        if (n==0) {
-            http::server::register_url_handler("/config.xml", h);
+        {
+            http::server::url_handler_ptr h(new http::server::config_handler(i->second.get()));
+            http::server::register_url_handler(s + "/config.xml", h);
+            if (n==0) {
+                http::server::register_url_handler("/config.xml", h);
+            }
         }
         
         n++;

@@ -4,13 +4,12 @@ TODO
 BUGS
 ----
 * Escape '"' in CSV serializer for output
+* Argos currently is *not* C++11 clean
 
 Features still missing
 -----------------------
 * Refine serialization
     + Memory usage of serialization is way too suboptimal, JSON serialization uses json_spirit which needs more attention.
-* Partial update
-    + Non-indexed fields can be inplace updated, which allows update message contains only fields needed, withou deleting and re-inserting whole document.
 * Histogram
     + Now histogram can only count docs, summary/average/... are still missing
 * Grouping

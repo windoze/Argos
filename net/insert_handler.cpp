@@ -28,9 +28,10 @@ namespace http {
                 : index_(index)
                 , ctx(*index_->create_context())
                 , update_count_(0)
+                , err(Logger::getInstance("error"))
                 {}
                 
-                bool insert_document(const std::string &doc)
+                bool insert_document(const background_command_t &doc)
                 {
                     if (update_count_>update_threshold) {
                         ctx.temp_pool->reset();
@@ -39,22 +40,80 @@ namespace http {
                     update_count_++;
                     
                     argos::common::value_list_t vl;
-                    const char *s=doc.c_str();
-                    size_t len=doc.size();
-                    if(!argos::parser::parse_value_list(s, len, vl, ctx))
+                    const char *s=doc.second.c_str();
+                    size_t len=doc.second.size();
+                    if(!argos::parser::parse_value_list(s, len, vl, ctx)) {
+                        LOG4CPLUS_ERROR(err, "Document parse failed :\"" << doc.second << "\"");
                         return false;
+                    }
                     for (argos::common::value_list_t::const_iterator i=vl.begin(); i!=vl.end(); ++i) {
                         if (i->type_==argos::common::VT_EMPTY) {
+                            LOG4CPLUS_ERROR(err, "Document contains empty field :\"" << doc.second << "\"");
                             return false;
                         }
                     }
-                    return argos::is_valid(index_->add_document(vl, ctx));
+                    bool ret=argos::is_valid(index_->add_document(vl, ctx));
+                    if (!ret) {
+                        LOG4CPLUS_ERROR(err, "Insert document failed :\"" << doc.second << "\"");
+                    }
+                    return ret;
+                }
+                
+                bool update_document(const background_command_t &doc)
+                {
+                    if (update_count_>update_threshold) {
+                        ctx.temp_pool->reset();
+                        update_count_=0;
+                    }
+                    update_count_++;
+                    
+                    argos::common::value_list_t vl;
+                    const char *s=doc.second.c_str();
+                    size_t len=doc.second.size();
+                    if(!argos::parser::parse_value_list(s, len, vl, ctx)) {
+                        LOG4CPLUS_ERROR(err, "Document parse failed :\"" << doc.second << "\"");
+                        return false;
+                    }
+                    // Check value list length, make sure it has correct number of fields
+                    if (vl.size()!=index_->get_field_config()->count()) {
+                        LOG4CPLUS_ERROR(err, "Document has wrong number of fields :\"" << doc.second << "\"");
+                        return false;
+                    }
+                    for (size_t i=0; i<vl.size(); i++) {
+                        // Check each field, make sure all indexed field are null
+                        argos::common::FieldDefinition *fd=index_->get_field_config()->get_field_def(i);
+                        if ((fd->indexed()) && (vl[i].type_!=argos::common::VT_EMPTY)) {
+                            LOG4CPLUS_ERROR(err, "Cannot update indexed field[" << i << ",\"" <<fd->get_name() << "\"] :\"" << doc.second << "\"");
+                            return false;
+                        } else {
+                            // Try to convert field to target type, make sure it's convertable
+                            if (vl[i].type_==argos::common::VT_EMPTY) {
+                                continue;
+                            }
+                            if (vl[i].coerce(to_value_type(fd->get_field_info().type_))==argos::common::VT_EMPTY) {
+                                LOG4CPLUS_ERROR(err, "Incompatible type at field[" << i << ",\"" <<fd->get_name() << "\"] :\"" << doc.second << "\"");
+                                return false;
+                            }
+                        }
+                    }
+                    
+                    // Everything is OK, now update the document
+                    argos::primary_key id=vl[0].cast(argos::common::VT_INTEGER).number;
+                    
+                    // Start from 2nd field, 1st is the primary key
+                    for (size_t i=1; i<vl.size(); i++) {
+                        if (vl[i].type_!=argos::common::VT_EMPTY) {
+                            index_->set_doc_field(id, i, vl[i]);
+                        }
+                    }
+                    return false;
                 }
                 
             private:
                 argos::index::Index *index_;
                 argos::common::ExecutionContext &ctx;
                 size_t update_count_;
+                Logger err;
             };
             
             struct update_thread_proc {
@@ -64,13 +123,23 @@ namespace http {
                 {}
                 
                 void operator()() {
-                    std::string s;
-                    while (upd_queue_.pop(s)) {
-                        updater_.insert_document(s);
+                    background_command_t c;
+                    while (upd_queue_.pop(c)) {
+                        switch (c.first) {
+                            case INSERT_COMMAND:
+                                updater_.insert_document(c);
+                                break;
+                            case UPDATE_COMMAND:
+                                updater_.update_document(c);
+                                break;
+                            default:
+                                // TODO: Error, Unknown command
+                                break;
+                        }
                     }
                 }
                 
-                void insert_document(const std::string &doc)
+                void insert_or_update_document(const background_command_t &doc)
                 {
                     upd_queue_.push(doc);
                 }
@@ -111,7 +180,15 @@ namespace http {
                 std::string data(req.uri.c_str()+qm+1, req.uri.size()-qm-1);
                 std::string doc;
                 url_decode(data, doc);
-                the_update_thread_proc_->insert_document(doc);
+                if (req.uri[qm-6]=='i') {
+                    // insert
+                    the_update_thread_proc_->insert_or_update_document(std::make_pair<int, std::string>(INSERT_COMMAND, doc));
+                } else if (req.uri[qm-6]=='u') {
+                    // update
+                    the_update_thread_proc_->insert_or_update_document(std::make_pair<int, std::string>(UPDATE_COMMAND, doc));
+                } else {
+                    // TODO: Error
+                }
                 rep=reply::stock_reply(reply::ok);
             }
             catch(argos::argos_logic_error &e) {

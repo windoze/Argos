@@ -172,12 +172,17 @@ Number of returned documents always equals to the number specified in `id` param
 
 ### Real-Time Update ###
 
-Argos supports real-time update, URL prefix is `/index_name/insert`
+Argos supports real-time update, URL prefix is `/index_name/insert` and `/index_name/update`
 
 After the question mark(`?`), remain part is a document in the same format used by indexer.
 
-If the document has same primary key already exists in the index, old one is deleted and the new one is inserted.
-Updating is asynchronous, there is no way to know if the updating is completed or failed, and no guarantee when the updating will happen.
+For insertion, if the document has same primary key already exists in the index, old one is replaced by the new one, which increases erase count.
+
+For updating, the document must still contain *all* fields, but all fields needn't to be updated should have value `null`.
+
+Only non-indexed and stored fields can be updated, otherwise, you have to use `insert` to create/replace whole document.
+
+Insertion and updating are asynchronous, there is no way to know if they are completed or failed, and no guarantee when the action will happen.
 
 ### Index Info ###
 

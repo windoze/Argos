@@ -130,25 +130,25 @@ namespace http {
             LOG4CPLUS_INFO(acc, "CLIENT:" << req.peer << ", CODE:" << rep.status << ", TIME:" << t*1000 << "ms, MEM:" << mc << ", CL:" << rep.content.size() << ", QID:[], URL:" << req.uri);
         }
         
-        typedef std::pair<std::string, url_handler *> handler_entry_t;
+        typedef std::pair<std::string, url_handler_ptr> handler_entry_t;
         typedef std::vector<handler_entry_t> handler_registry_t;
         handler_registry_t handler_registry;
         
-        void register_url_handler(const std::string &prefix, url_handler *handler)
+        void register_url_handler(const std::string &prefix, url_handler_ptr handler)
         {
             handler_registry.push_back(handler_entry_t(prefix, handler));
         }
         
-        url_handler *get_url_handler(const std::string &url)
+        url_handler_ptr get_url_handler(const std::string &url)
         {
             // authority part already removed from url
-            // Go backward
+            // Go backward, as the static handler handles '/', which always matches any request, must be checked at last
             for (handler_registry_t::reverse_iterator i=handler_registry.rbegin(); i!=handler_registry.rend(); i++) {
                 if (strncasecmp(url.c_str(), i->first.c_str(), i->first.size())==0) {
                     return i->second;
                 }
             }
-            return NULL;
+            return url_handler_ptr();
         }
     }   // End of namespace server
 }   // End of namespace http

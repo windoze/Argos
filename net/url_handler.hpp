@@ -10,6 +10,7 @@
 #define net_url_handler_h
 
 #include <string>
+#include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 #include "request.hpp"
 #include "reply.hpp"
@@ -22,9 +23,12 @@ namespace http {
     namespace server {
         class url_handler {
         public:
+            virtual ~url_handler() {}
             virtual void handle_request(const request& req, reply& rep)=0;
             bool url_decode(const std::string& in, std::string& out);
         };
+        
+        typedef boost::shared_ptr<url_handler> url_handler_ptr;
         
         class static_url_handler : public url_handler {
         public:
@@ -71,8 +75,8 @@ namespace http {
             return fn.string<std::string>();
         }
         
-        void register_url_handler(const std::string &prefix, url_handler *handler);
-        url_handler *get_url_handler(const std::string &url);
+        void register_url_handler(const std::string &prefix, url_handler_ptr handler);
+        url_handler_ptr get_url_handler(const std::string &url);
 
     }   // End of namespace server
 }   // End of namespace http

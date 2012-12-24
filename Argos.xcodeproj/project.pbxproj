@@ -275,7 +275,7 @@
 		2D9633EC16881090008E91DE /* q.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = q.html; sourceTree = "<group>"; };
 		2D9633ED16881090008E91DE /* results.xsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = results.xsl; sourceTree = "<group>"; };
 		2D9633EE16881090008E91DE /* urlcodec.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = urlcodec.html; sourceTree = "<group>"; };
-		2D96345B16881102008E91DE /* indexer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "indexer"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2D96345B16881102008E91DE /* indexer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = indexer; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D96345E168813B8008E91DE /* result.pb.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = result.pb.cc; sourceTree = "<group>"; };
 		2D96345F168813B8008E91DE /* result.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = result.pb.h; sourceTree = "<group>"; };
 		2D96346616881614008E91DE /* libboost_program_options-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_program_options-mt.a"; path = "../../../../opt/local/lib/libboost_program_options-mt.a"; sourceTree = "<group>"; };
@@ -334,14 +334,14 @@
 				2D96346A16881614008E91DE /* libicudata.a */,
 				2D96346B16881614008E91DE /* libicuuc.a */,
 				2D96346C16881614008E91DE /* libprotobuf-lite.a */,
+				2D96334E16881090008E91DE /* CMakeLists.txt */,
 				2D96345D1688110F008E91DE /* docs */,
+				2D96334F16881090008E91DE /* CMakeModules */,
+				2D96336416881090008E91DE /* include */,
 				2D96333F16881090008E91DE /* analyzer */,
 				2D96334716881090008E91DE /* argos_ri_backend */,
-				2D96334E16881090008E91DE /* CMakeLists.txt */,
-				2D96334F16881090008E91DE /* CMakeModules */,
 				2D96335216881090008E91DE /* common */,
 				2D96336016881090008E91DE /* dummy_ri_backend */,
-				2D96336416881090008E91DE /* include */,
 				2D96339216881090008E91DE /* index */,
 				2D96339A16881090008E91DE /* indexer */,
 				2D96339E16881090008E91DE /* json_spirit */,
@@ -369,9 +369,9 @@
 		2D96333F16881090008E91DE /* analyzer */ = {
 			isa = PBXGroup;
 			children = (
+				2D96334216881090008E91DE /* CMakeLists.txt */,
 				2D96334016881090008E91DE /* analyser.cpp */,
 				2D96334116881090008E91DE /* char_type.h */,
-				2D96334216881090008E91DE /* CMakeLists.txt */,
 				2D96334316881090008E91DE /* text_analyzer.cpp */,
 			);
 			path = analyzer;
@@ -380,9 +380,9 @@
 		2D96334716881090008E91DE /* argos_ri_backend */ = {
 			isa = PBXGroup;
 			children = (
+				2D96334A16881090008E91DE /* CMakeLists.txt */,
 				2D96334816881090008E91DE /* argos_match.cpp */,
 				2D96334916881090008E91DE /* argos_match.h */,
-				2D96334A16881090008E91DE /* CMakeLists.txt */,
 				2D96334B16881090008E91DE /* doc_ops.cpp */,
 				2D96334C16881090008E91DE /* rindex.cpp */,
 				2D96334D16881090008E91DE /* rindex.h */,
@@ -402,8 +402,8 @@
 		2D96335216881090008E91DE /* common */ = {
 			isa = PBXGroup;
 			children = (
-				2D96335316881090008E91DE /* aton.cpp */,
 				2D96335416881090008E91DE /* CMakeLists.txt */,
+				2D96335316881090008E91DE /* aton.cpp */,
 				2D96335516881090008E91DE /* expr_node.cpp */,
 				2D96335616881090008E91DE /* field_config.cpp */,
 				2D96335716881090008E91DE /* mem_pool.cpp */,
@@ -430,18 +430,18 @@
 		2D96336416881090008E91DE /* include */ = {
 			isa = PBXGroup;
 			children = (
-				2D96336516881090008E91DE /* analyzer.h */,
 				2D96336616881090008E91DE /* common */,
-				2D96337A16881090008E91DE /* common.h */,
 				2D96337B16881090008E91DE /* index */,
+				2D96338416881090008E91DE /* pugixml */,
+				2D96338616881090008E91DE /* query */,
+				2D96338D16881090008E91DE /* utf8 */,
+				2D96336516881090008E91DE /* analyzer.h */,
+				2D96337A16881090008E91DE /* common.h */,
 				2D96338116881090008E91DE /* index.h */,
 				2D96338216881090008E91DE /* logging.h */,
 				2D96338316881090008E91DE /* parser.h */,
-				2D96338416881090008E91DE /* pugixml */,
-				2D96338616881090008E91DE /* query */,
 				2D96338B16881090008E91DE /* query.h */,
 				2D96338C16881090008E91DE /* serialization.h */,
-				2D96338D16881090008E91DE /* utf8 */,
 				2D96339116881090008E91DE /* utf8.h */,
 			);
 			path = include;
@@ -596,8 +596,8 @@
 		2D9633CB16881090008E91DE /* parser */ = {
 			isa = PBXGroup;
 			children = (
-				2D9633CC16881090008E91DE /* aql_parser.cpp */,
 				2D9633CD16881090008E91DE /* CMakeLists.txt */,
+				2D9633CC16881090008E91DE /* aql_parser.cpp */,
 				2D9633CE16881090008E91DE /* parser.cpp */,
 				2D9633CF16881090008E91DE /* urldecode.cpp */,
 				2D9633D016881090008E91DE /* value_parser.h */,
@@ -638,9 +638,9 @@
 		2D9633DE16881090008E91DE /* serialization */ = {
 			isa = PBXGroup;
 			children = (
+				2D9633DF16881090008E91DE /* CMakeLists.txt */,
 				2D96345E168813B8008E91DE /* result.pb.cc */,
 				2D96345F168813B8008E91DE /* result.pb.h */,
-				2D9633DF16881090008E91DE /* CMakeLists.txt */,
 				2D9633E016881090008E91DE /* result.proto */,
 				2D9633E116881090008E91DE /* serialization.cpp */,
 			);
@@ -872,8 +872,6 @@
 					"$(SRCROOT)/include",
 					/opt/local/include,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				SDKROOT = macosx;
 				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
@@ -899,8 +897,6 @@
 					"$(SRCROOT)/include",
 					/opt/local/include,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
-				SDKROOT = macosx;
 				VALID_ARCHS = x86_64;
 			};
 			name = Release;
@@ -934,7 +930,7 @@
 					"$(inherited)",
 					/opt/local/lib,
 				);
-				PRODUCT_NAME = "indexer";
+				PRODUCT_NAME = indexer;
 			};
 			name = Debug;
 		};
@@ -945,7 +941,7 @@
 					"$(inherited)",
 					/opt/local/lib,
 				);
-				PRODUCT_NAME = "indexer";
+				PRODUCT_NAME = indexer;
 			};
 			name = Release;
 		};
