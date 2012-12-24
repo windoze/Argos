@@ -105,6 +105,27 @@ namespace argos {
         typedef std::vector<Value, mpv_allocator> value_list_t;
         
         /**
+         * A tag class used to create empty Value
+         *
+         * A stripped-down container interface is provided for Boost.Spirit parsing token "null"
+         **/
+        struct NullValue {
+            typedef size_t value_type;
+            
+            NullValue(){}
+            
+            template<typename T>
+            NullValue(const T &){}
+            
+            template<typename T, typename U>
+            NullValue(const T &, const U &){}
+            
+            inline bool empty() const { return true; }
+            inline int end() const { return 0; }
+            inline void insert(int /*unused*/, char /*unused*/) {}
+        };
+        
+        /**
          * struct Value is a variant value holder
          *
          * Simple value is stored inside the struct, variant-size value is not owned, Value
@@ -121,6 +142,12 @@ namespace argos {
             };
             
             Value()
+            : type_(VT_EMPTY)
+            , number(0)
+            {}
+            
+            // Create an empty value, used by value parser
+            explicit Value(NullValue nv)
             : type_(VT_EMPTY)
             , number(0)
             {}

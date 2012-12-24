@@ -60,6 +60,10 @@ namespace argos {
                 simple_value = real
                              | i64
                              | geo_location
+                             | empty_value
+                ;
+                
+                empty_value = boost::spirit::lit("null")
                 ;
                 
                 geo_location = '<' >> boost::spirit::double_ >> ',' >> boost::spirit::double_ >> '>'
@@ -77,6 +81,7 @@ namespace argos {
             // Uses boost::spirit::long_long will cause GCC fail to compile due to ambiguous conversion
             // And uses boost::spirit::long_ will mess Clang, WTF
             boost::spirit::qi::int_parser<int64_t> i64;
+            boost::spirit::qi::rule<Iterator, common::NullValue(), boost::spirit::ascii::space_type> empty_value;
             boost::spirit::qi::rule<Iterator, common::Value(), boost::spirit::ascii::space_type> value;
             boost::spirit::qi::rule<Iterator, common::Value(), boost::spirit::ascii::space_type> simple_value;
             boost::spirit::qi::rule<Iterator, std::pair<double, double>(), boost::spirit::ascii::space_type> geo_location;
@@ -84,7 +89,7 @@ namespace argos {
             boost::spirit::qi::rule<Iterator, common::value_list_t(), boost::spirit::ascii::space_type> empty_array;
             esc_string_parser<Iterator> string_;
             boost::spirit::qi::rule<Iterator, std::string()> content;
-            boost::spirit::qi::real_parser<double, strict_real_policies<double> > real;
+            boost::spirit::qi::real_parser<double, boost::spirit::qi::strict_real_policies<double> > real;
         };
         
         template <typename Iterator>
