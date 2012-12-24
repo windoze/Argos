@@ -117,6 +117,16 @@ namespace argos {
             common::Value get_doc_field(docid did, int fid) const;
             
             /**
+             * Set value of the field of the document
+             */
+            bool set_doc_field(primary_key pk, int fid, common::Value v);
+            
+            /**
+             * Set value of the field of the document
+             */
+            bool set_doc_field(docid did, int fid, common::Value v);
+            
+            /**
              * Return a value list for the document
              */
             bool get_value_list(primary_key pk, const common::field_list_t &fl, common::value_list_t &vl, common::ExecutionContext &ctx) const;

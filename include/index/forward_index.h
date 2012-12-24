@@ -96,6 +96,16 @@ namespace argos {
              */
             bool set_document(docid did, const common::value_list_t &vl);
             
+            inline bool set_field_value(const char *field_name, docid did, common::Value v)
+            {
+                return get_storage()->set_field_value(field_name, did, v);
+            }
+            
+            inline bool set_field_value(int fid, docid did, common::Value v)
+            {
+                return get_storage()->set_field_value(fid, did, v);
+            }
+
             size_t get_field_length(docid did, int fid) const;
 
             /**

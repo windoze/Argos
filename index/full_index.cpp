@@ -338,5 +338,22 @@ namespace argos {
             }
             return get_value_list(fi_->get_docid(pk), fl, vl, ctx);
         }
+        
+        bool Index::set_doc_field(primary_key pk, int fid, common::Value v)
+        {
+            docid did=get_docid(pk);
+            if (!is_valid(did)) {
+                return false;
+            }
+            return fi_->set_field_value(fid, did, v);
+        }
+        
+        bool Index::set_doc_field(docid did, int fid, common::Value v)
+        {
+            if (!is_valid(did)) {
+                return false;
+            }
+            return fi_->set_field_value(fid, did, v);
+        }
     }   // End of namespace index
 }   // End of namespace argos
