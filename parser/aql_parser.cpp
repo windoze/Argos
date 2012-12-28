@@ -6,6 +6,8 @@
 //  Copyright (c) 2012 0d0a.com. All rights reserved.
 //
 
+#if 0
+
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include "query/argos_query.h"
@@ -101,6 +103,8 @@ namespace argos {
         };
     }   // End of namespace aql
 }   // End of namespace argos
+
+#endif
 
 /**
  start ::= statement
