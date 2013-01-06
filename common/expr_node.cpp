@@ -45,7 +45,7 @@ namespace argos {
         ExprNode::ExprNode(const char *op_name)
         : op(get_operator(op_name))
         {
-            if (op->stateful()) {
+            if (op && op->stateful()) {
                 op=op->clone();
             }
         }
@@ -53,7 +53,7 @@ namespace argos {
         ExprNode::ExprNode(const char *op_name, size_t sz)
         : op(get_operator(op_name, sz))
         {
-            if (op->stateful()) {
+            if (op && op->stateful()) {
                 op=op->clone();
             }
         }
@@ -61,7 +61,7 @@ namespace argos {
         ExprNode::ExprNode(Operator *o)
         : op(o)
         {
-            if (op->stateful()) {
+            if (op && op->stateful()) {
                 op=op->clone();
             }
         }
