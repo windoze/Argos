@@ -37,7 +37,7 @@
 #      include_directories(${ICU_INCLUDE_DIRS})
 #      add_executable(myapp myapp.c)
 #      target_link_libraries(myapp ${ICU_LIBRARIES})
-#   endif()
+#   endif(ICU_FOUND)
 
 #=============================================================================
 # Copyright (c) 2011-2012, julp
@@ -100,7 +100,12 @@ icu_declare_component(lx   iculx)         # Paragraph Layout library
 set(${ICU_PUBLIC_VAR_NS}_FOUND TRUE)
 set(${ICU_PUBLIC_VAR_NS}_LIBRARIES )
 set(${ICU_PUBLIC_VAR_NS}_INCLUDE_DIRS )
-set(${ICU_PUBLIC_VAR_NS}_DEFINITIONS )
+set(${ICU_PUBLIC_VAR_NS}_C_FLAGS "")
+set(${ICU_PUBLIC_VAR_NS}_CXX_FLAGS "")
+set(${ICU_PUBLIC_VAR_NS}_CPP_FLAGS "")
+set(${ICU_PUBLIC_VAR_NS}_C_SHARED_FLAGS "")
+set(${ICU_PUBLIC_VAR_NS}_CXX_SHARED_FLAGS "")
+set(${ICU_PUBLIC_VAR_NS}_CPP_SHARED_FLAGS "")
 foreach(${ICU_PRIVATE_VAR_NS}_COMPONENT ${${ICU_PRIVATE_VAR_NS}_COMPONENTS})
     string(TOUPPER "${${ICU_PRIVATE_VAR_NS}_COMPONENT}" ${ICU_PRIVATE_VAR_NS}_UPPER_COMPONENT)
     set("${ICU_PUBLIC_VAR_NS}_${${ICU_PRIVATE_VAR_NS}_UPPER_COMPONENT}_FOUND" FALSE) # may be done in the icu_declare_component macro
@@ -139,7 +144,7 @@ if(${ICU_PUBLIC_VAR_NS}_INCLUDE_DIRS)
     elseif(EXISTS "${${ICU_PUBLIC_VAR_NS}_INCLUDE_DIRS}/utypes.h") # ICU 1.3
         file(READ "${${ICU_PUBLIC_VAR_NS}_INCLUDE_DIRS}/utypes.h" ${ICU_PRIVATE_VAR_NS}_VERSION_HEADER_CONTENTS)
     else()
-        message("ICU version header not found")
+        message(FATAL_ERROR "ICU version header not found")
     endif()
 
     if(${ICU_PRIVATE_VAR_NS}_VERSION_HEADER_CONTENTS MATCHES ".*# *define *ICU_VERSION *\"([0-9]+)\".*") # ICU 1.3
@@ -175,7 +180,7 @@ if(${ICU_PUBLIC_VAR_NS}_INCLUDE_DIRS)
             set(${ICU_PUBLIC_VAR_NS}_PATCH_VERSION "${CMAKE_MATCH_3}")
         endif()
     else()
-        message("failed to detect ICU version")
+        message(FATAL_ERROR "failed to detect ICU version")
     endif()
     set(${ICU_PUBLIC_VAR_NS}_VERSION "${${ICU_PUBLIC_VAR_NS}_MAJOR_VERSION}.${${ICU_PUBLIC_VAR_NS}_MINOR_VERSION}.${${ICU_PUBLIC_VAR_NS}_PATCH_VERSION}")
     ########## </part to keep synced with tests/version/CMakeLists.txt> ##########
@@ -242,9 +247,20 @@ if(${ICU_PUBLIC_VAR_NS}_INCLUDE_DIRS)
             list(APPEND ${ICU_PUBLIC_VAR_NS}_LIBRARIES ${${ICU_PRIVATE_VAR_NS}_LIB_${${ICU_PRIVATE_VAR_NS}_COMPONENT}})
         endif(NOT ${ICU_PRIVATE_VAR_NS}_LIB_RELEASE_${${ICU_PRIVATE_VAR_NS}_COMPONENT} AND NOT ${ICU_PRIVATE_VAR_NS}_LIB_DEBUG_${${ICU_PRIVATE_VAR_NS}_COMPONENT})
     endforeach(${ICU_PRIVATE_VAR_NS}_COMPONENT)
-endif(${ICU_PUBLIC_VAR_NS}_INCLUDE_DIRS)
 
-if(${ICU_PUBLIC_VAR_NS}_INCLUDE_DIRS)
+    # Try to find out compiler flags
+    find_program(${ICU_PUBLIC_VAR_NS}_CONFIG_EXECUTABLE HINTS ${${ICU_PRIVATE_VAR_NS}_ROOT} icu-config)
+    if(${ICU_PUBLIC_VAR_NS}_CONFIG_EXECUTABLE)
+        execute_process(COMMAND ${${ICU_PUBLIC_VAR_NS}_CONFIG_EXECUTABLE} --cflags OUTPUT_VARIABLE ${ICU_PUBLIC_VAR_NS}_C_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+        execute_process(COMMAND ${${ICU_PUBLIC_VAR_NS}_CONFIG_EXECUTABLE} --cxxflags OUTPUT_VARIABLE ${ICU_PUBLIC_VAR_NS}_CXX_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+        execute_process(COMMAND ${${ICU_PUBLIC_VAR_NS}_CONFIG_EXECUTABLE} --cppflags OUTPUT_VARIABLE ${ICU_PUBLIC_VAR_NS}_CPP_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+        execute_process(COMMAND ${${ICU_PUBLIC_VAR_NS}_CONFIG_EXECUTABLE} --cflags-dynamic OUTPUT_VARIABLE ${ICU_PUBLIC_VAR_NS}_C_SHARED_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+        execute_process(COMMAND ${${ICU_PUBLIC_VAR_NS}_CONFIG_EXECUTABLE} --cxxflags-dynamic OUTPUT_VARIABLE ${ICU_PUBLIC_VAR_NS}_CXX_SHARED_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+        execute_process(COMMAND ${${ICU_PUBLIC_VAR_NS}_CONFIG_EXECUTABLE} --cppflags-dynamic OUTPUT_VARIABLE ${ICU_PUBLIC_VAR_NS}_CPP_SHARED_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif(${ICU_PUBLIC_VAR_NS}_CONFIG_EXECUTABLE)
+
+    # Check find_package arguments
     include(FindPackageHandleStandardArgs)
     if(${ICU_PUBLIC_VAR_NS}_FIND_REQUIRED AND NOT ${ICU_PUBLIC_VAR_NS}_FIND_QUIETLY)
         find_package_handle_standard_args(
@@ -280,6 +296,13 @@ icudebug("IO_FOUND")
 icudebug("LE_FOUND")
 icudebug("LX_FOUND")
 icudebug("DATA_FOUND")
+# Flags
+icudebug("C_FLAGS")
+icudebug("CPP_FLAGS")
+icudebug("CXX_FLAGS")
+icudebug("C_SHARED_FLAGS")
+icudebug("CPP_SHARED_FLAGS")
+icudebug("CXX_SHARED_FLAGS")
 # Linking
 icudebug("INCLUDE_DIRS")
 icudebug("LIBRARIES")
