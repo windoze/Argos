@@ -147,6 +147,39 @@ namespace argos {
             inline void insert(int /*unused*/, char /*unused*/) {}
         };
         
+        inline VALUE_TYPE coerce(VALUE_TYPE vt1, VALUE_TYPE vt2)
+        {
+            if (vt1==vt2) {
+                return vt1;
+            }
+            switch (vt1) {
+                case VT_EMPTY:
+                    return vt2;
+                case VT_INTEGER:
+                    switch (vt2) {
+                        case VT_EMPTY:
+                            return VT_INTEGER;
+                        case VT_DOUBLE:
+                            return VT_DOUBLE;
+                        default:
+                            return VT_EMPTY;
+                    }
+                    break;
+                case VT_DOUBLE:
+                    switch (vt2) {
+                        case VT_EMPTY:
+                            return VT_DOUBLE;
+                        case VT_INTEGER:
+                            return VT_DOUBLE;
+                        default:
+                            return VT_EMPTY;
+                    }
+                    break;
+                default:
+                    return VT_EMPTY;
+            }
+        }
+        
         /**
          * struct Value is a variant value holder
          *

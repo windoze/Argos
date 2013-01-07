@@ -92,6 +92,13 @@ namespace argos {
                 virtual const char *get_name() const { return "ADD"; }
                 virtual bool validate_arity(size_t arity) const { return arity>=2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    VALUE_TYPE vt=tl[0];
+                    for(size_t i=1; i<tl.size(); i++) {
+                        vt=coerce(vt, tl[i]);
+                    }
+                    return vt;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     Value ret(int64_t(0));
                     for (oprands_t::const_iterator i=oprands.begin(); i!=oprands.end(); ++i) {
@@ -108,6 +115,9 @@ namespace argos {
                 virtual const char *get_name() const { return "SUB"; }
                 virtual bool validate_arity(size_t arity) const { return arity==2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return coerce(tl[0], tl[1]);
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return oprands[0]->evaluate(did, context)-oprands[1]->evaluate(did, context);
                 }
@@ -120,6 +130,13 @@ namespace argos {
                 virtual const char *get_name() const { return "MUL"; }
                 virtual bool validate_arity(size_t arity) const { return arity>=2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    VALUE_TYPE vt=tl[0];
+                    for(size_t i=1; i<tl.size(); i++) {
+                        vt=coerce(vt, tl[i]);
+                    }
+                    return vt;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     Value ret(int64_t(1));
                     for (oprands_t::const_iterator i=oprands.begin(); i!=oprands.end(); ++i) {
@@ -136,6 +153,9 @@ namespace argos {
                 virtual const char *get_name() const { return "DIV"; }
                 virtual bool validate_arity(size_t arity) const { return arity==2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return coerce(tl[0], tl[1]);
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return oprands[0]->evaluate(did, context)/oprands[1]->evaluate(did, context);
                 }
@@ -148,6 +168,9 @@ namespace argos {
                 virtual const char *get_name() const { return "MOD"; }
                 virtual bool validate_arity(size_t arity) const { return arity==2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return coerce(tl[0], tl[1]);
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return oprands[0]->evaluate(did, context)%oprands[1]->evaluate(did, context);
                 }
@@ -160,6 +183,9 @@ namespace argos {
                 virtual const char *get_name() const { return "NEG"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return tl[0];
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(int64_t(0))-oprands[0]->evaluate(did, context);
                 }
@@ -172,6 +198,9 @@ namespace argos {
                 virtual const char *get_name() const { return "LT"; }
                 virtual bool validate_arity(size_t arity) const { return arity==2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_INTEGER;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return oprands[0]->evaluate(did, context) < oprands[1]->evaluate(did, context);
                 }
@@ -184,6 +213,9 @@ namespace argos {
                 virtual const char *get_name() const { return "LE"; }
                 virtual bool validate_arity(size_t arity) const { return arity==2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_INTEGER;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return oprands[0]->evaluate(did, context) <= oprands[1]->evaluate(did, context);
                 }
@@ -196,6 +228,9 @@ namespace argos {
                 virtual const char *get_name() const { return "GT"; }
                 virtual bool validate_arity(size_t arity) const { return arity==2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_INTEGER;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return oprands[0]->evaluate(did, context) > oprands[1]->evaluate(did, context);
                 }
@@ -208,6 +243,9 @@ namespace argos {
                 virtual const char *get_name() const { return "GE"; }
                 virtual bool validate_arity(size_t arity) const { return arity==2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_INTEGER;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return oprands[0]->evaluate(did, context) >= oprands[1]->evaluate(did, context);
                 }
@@ -220,6 +258,9 @@ namespace argos {
                 virtual const char *get_name() const { return "EQ"; }
                 virtual bool validate_arity(size_t arity) const { return arity==2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_INTEGER;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return oprands[0]->evaluate(did, context) == oprands[1]->evaluate(did, context);
                 }
@@ -232,6 +273,9 @@ namespace argos {
                 virtual const char *get_name() const { return "NE"; }
                 virtual bool validate_arity(size_t arity) const { return arity==2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_INTEGER;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return oprands[0]->evaluate(did, context) != oprands[1]->evaluate(did, context);
                 }
@@ -244,6 +288,9 @@ namespace argos {
                 virtual const char *get_name() const { return "AND"; }
                 virtual bool validate_arity(size_t arity) const { return arity>=2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_INTEGER;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     Value ret(int64_t(1));
                     for (oprands_t::const_iterator i=oprands.begin(); i!=oprands.end(); ++i) {
@@ -264,6 +311,9 @@ namespace argos {
                 virtual const char *get_name() const { return "OR"; }
                 virtual bool validate_arity(size_t arity) const { return arity>=2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_INTEGER;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     Value ret(int64_t(0));
                     for (oprands_t::const_iterator i=oprands.begin(); i!=oprands.end(); ++i) {
@@ -284,6 +334,9 @@ namespace argos {
                 virtual const char *get_name() const { return "XOR"; }
                 virtual bool validate_arity(size_t arity) const { return arity>=2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_INTEGER;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     Value ret(int64_t(0));
                     for (oprands_t::const_iterator i=oprands.begin(); i!=oprands.end(); ++i) {
@@ -300,6 +353,9 @@ namespace argos {
                 virtual const char *get_name() const { return "NOT"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_INTEGER;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(int64_t(!(oprands[0]->evaluate(did, context))));
                 }
@@ -312,6 +368,9 @@ namespace argos {
                 virtual const char *get_name() const { return "LOG"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(log(oprands[0]->evaluate(did, context).cast(VT_DOUBLE).dnumber));
                 }
@@ -324,6 +383,9 @@ namespace argos {
                 virtual const char *get_name() const { return "LOG10"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(log10(oprands[0]->evaluate(did, context).cast(VT_DOUBLE).dnumber));
                 }
@@ -336,6 +398,9 @@ namespace argos {
                 virtual const char *get_name() const { return "LOG2"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(log2(oprands[0]->evaluate(did, context).cast(VT_DOUBLE).dnumber));
                 }
@@ -348,6 +413,9 @@ namespace argos {
                 virtual const char *get_name() const { return "EXP"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(exp(oprands[0]->evaluate(did, context).cast(VT_DOUBLE).dnumber));
                 }
@@ -360,6 +428,9 @@ namespace argos {
                 virtual const char *get_name() const { return "POW2"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value((oprands[0]->evaluate(did, context).cast(VT_DOUBLE).dnumber)
                                  * (oprands[0]->evaluate(did, context).cast(VT_DOUBLE).dnumber));
@@ -373,6 +444,9 @@ namespace argos {
                 virtual const char *get_name() const { return "POW"; }
                 virtual bool validate_arity(size_t arity) const { return arity==2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(pow(oprands[0]->evaluate(did, context).cast(VT_DOUBLE).dnumber,
                                oprands[1]->evaluate(did, context).cast(VT_DOUBLE).dnumber));
@@ -386,6 +460,9 @@ namespace argos {
                 virtual const char *get_name() const { return "SQRT"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(sqrt(oprands[0]->evaluate(did, context).cast(VT_DOUBLE).dnumber));
                 }
@@ -398,6 +475,9 @@ namespace argos {
                 virtual const char *get_name() const { return "SIN"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(sin(oprands[0]->evaluate(did, context).cast(VT_DOUBLE).dnumber));
                 }
@@ -410,6 +490,9 @@ namespace argos {
                 virtual const char *get_name() const { return "COS"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(cos(oprands[0]->evaluate(did, context).cast(VT_DOUBLE).dnumber));
                 }
@@ -422,6 +505,9 @@ namespace argos {
                 virtual const char *get_name() const { return "TAN"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(tan(oprands[0]->evaluate(did, context).cast(VT_DOUBLE).dnumber));
                 }
@@ -434,6 +520,9 @@ namespace argos {
                 virtual const char *get_name() const { return "ASIN"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(asin(oprands[0]->evaluate(did, context).cast(VT_DOUBLE).dnumber));
                 }
@@ -446,6 +535,9 @@ namespace argos {
                 virtual const char *get_name() const { return "ACOS"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(acos(oprands[0]->evaluate(did, context).cast(VT_DOUBLE).dnumber));
                 }
@@ -458,6 +550,9 @@ namespace argos {
                 virtual const char *get_name() const { return "ATAN"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(atan(oprands[0]->evaluate(did, context).cast(VT_DOUBLE).dnumber));
                 }
@@ -470,6 +565,9 @@ namespace argos {
                 virtual const char *get_name() const { return "IF"; }
                 virtual bool validate_arity(size_t arity) const { return arity==3; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return coerce(tl[1], tl[2]);
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     if (bool(oprands[0]->evaluate(did, context))) {
                         return oprands[1]->evaluate(did, context);
@@ -485,6 +583,13 @@ namespace argos {
                 virtual const char *get_name() const { return "CASE"; }
                 virtual bool validate_arity(size_t arity) const { return arity>=3; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    VALUE_TYPE vt=tl[1];
+                    for(size_t i=2; i<tl.size(); i++) {
+                        vt=coerce(vt, tl[i]);
+                    }
+                    return vt;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     int64_t n=(oprands[0]->evaluate(did, context)).cast(VT_INTEGER).number;
                     if (n>oprands.size()+1 || n<0) {
@@ -502,6 +607,9 @@ namespace argos {
                 virtual const char *get_name() const { return "RANGE"; }
                 virtual bool validate_arity(size_t arity) const { return arity>=2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_INTEGER;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     Value v=oprands[0]->evaluate(did, context);
                     for (int64_t i=1; i<oprands.size(); i++) {
@@ -521,6 +629,9 @@ namespace argos {
                 virtual const char *get_name() const { return "LEN"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_INTEGER;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     Value v=oprands[0]->evaluate(did, context);
                     if (v.type_==VT_STRING) {
@@ -540,6 +651,10 @@ namespace argos {
                 virtual const char *get_name() const { return "AT"; }
                 virtual bool validate_arity(size_t arity) const { return arity==2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    // TODO:...
+                    return VT_INTEGER;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     Value arr=oprands[0]->evaluate(did, context);
                     if (arr.type_==VT_ARRAY) {
@@ -561,6 +676,9 @@ namespace argos {
                 virtual const char *get_name() const { return "FIND"; }
                 virtual bool validate_arity(size_t arity) const { return arity==2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_INTEGER;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     Value arr=oprands[0]->evaluate(did, context);
                     if (arr.type_==VT_ARRAY) {
@@ -617,6 +735,9 @@ namespace argos {
                 virtual const char *get_name() const { return "LAT"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(get_lat(oprands[0]->evaluate(did, context)));
                 }
@@ -627,6 +748,9 @@ namespace argos {
                 virtual const char *get_name() const { return "LNG"; }
                 virtual bool validate_arity(size_t arity) const { return arity==1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(get_long(oprands[0]->evaluate(did, context)));
                 }
@@ -637,6 +761,9 @@ namespace argos {
                 virtual const char *get_name() const { return "GEOLOC"; }
                 virtual bool validate_arity(size_t arity) const { return arity==2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_GEOLOCATION;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     return Value(oprands[0]->evaluate(did, context).cast(VT_DOUBLE).dnumber,
                                  oprands[1]->evaluate(did, context).cast(VT_DOUBLE).dnumber);
@@ -655,6 +782,9 @@ namespace argos {
                 virtual const char *get_name() const { return "DIST"; }
                 virtual bool validate_arity(size_t arity) const { return (arity==2) || (arity==4); }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     double lat1,long1,lat2,long2;
                     // We have either 4 oprands or 2 oprands
@@ -690,6 +820,9 @@ namespace argos {
                 virtual const char *get_name() const { return "MINDIST"; }
                 virtual bool validate_arity(size_t arity) const { return (arity==2); }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_DOUBLE;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     // We have at exact 2 oprands
                     // First one must be convertible to geolocation
@@ -731,6 +864,14 @@ namespace argos {
                 virtual const char *get_name() const { return "MIN"; }
                 virtual bool validate_arity(size_t arity) const { return arity>=1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    // TODO: Handle array
+                    VALUE_TYPE vt=tl[0];
+                    for(size_t i=1; i<tl.size(); i++) {
+                        vt=coerce(vt, tl[i]);
+                    }
+                    return vt;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     Value v=oprands[0]->evaluate(did, context);
                     if (v.type_==common::VT_ARRAY) {
@@ -765,6 +906,14 @@ namespace argos {
                 virtual const char *get_name() const { return "MAX"; }
                 virtual bool validate_arity(size_t arity) const { return arity>=1; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    // TODO: Handle array
+                    VALUE_TYPE vt=tl[0];
+                    for(size_t i=1; i<tl.size(); i++) {
+                        vt=coerce(vt, tl[i]);
+                    }
+                    return vt;
+                }
                 virtual Value evaluate(docid did, ExecutionContext &context, const oprands_t &oprands) const {
                     Value v=oprands[0]->evaluate(did, context);
                     if (v.type_==common::VT_ARRAY) {
@@ -798,6 +947,9 @@ namespace argos {
                 virtual const char *get_name() const { return "REGEX"; }
                 virtual bool validate_arity(size_t arity) const { return arity==2; }
                 virtual bool const_foldable() const { return true; }
+                virtual VALUE_TYPE type_inference(const type_list_t &tl) const {
+                    return VT_INTEGER;
+                }
                 virtual bool stateful() const { return true; }
                 virtual Operator *clone() {
                     return new RegexOp;

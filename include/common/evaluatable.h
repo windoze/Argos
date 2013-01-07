@@ -47,6 +47,11 @@ namespace argos {
              * Returns true if this evaluatable is constant
              */
             virtual bool is_const() const=0;
+            
+            /**
+             * Type inference
+             */
+            virtual VALUE_TYPE type() const=0;
 
             /**
              * Returns true if this evaluatable needs per-doc match info
@@ -120,6 +125,11 @@ namespace argos {
              * This is a constant
              */
             virtual int eva_type() const { return ET_CONST; }
+            
+            /**
+             * Constant's type is value's type
+             */
+            virtual VALUE_TYPE type() const { return value.type_; }
 
             /**
              * This is a constant

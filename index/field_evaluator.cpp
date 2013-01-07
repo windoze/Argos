@@ -79,6 +79,11 @@ namespace argos {
             }
         }
         
+        common::VALUE_TYPE FieldEvaluator::type() const
+        {
+            return common::to_value_type(fi_.type_);
+        }
+        
         std::string FieldEvaluator::to_string_impl() const
         {
             return field_config_->get_field_def(fid_)->get_name();

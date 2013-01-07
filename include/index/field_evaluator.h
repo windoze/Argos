@@ -29,6 +29,7 @@ namespace argos {
             {}
             
             virtual int eva_type() const { return common::ET_ATTR; }
+            virtual common::VALUE_TYPE type() const;
             virtual bool is_const() const { return false; }
             virtual bool uses_match_info() const { return false; }
             virtual common::Value evaluate(docid did, common::ExecutionContext &context) const;

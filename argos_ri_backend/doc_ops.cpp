@@ -50,6 +50,9 @@ namespace argos {
             
             // Term count is not same for different doc
             virtual bool is_const() const { return false; }
+            virtual common::VALUE_TYPE type() const {
+                return common::VT_INTEGER;
+            }
             // This op requires per-doc match info
             virtual bool uses_match_info() const { return true; }
             
@@ -117,6 +120,9 @@ namespace argos {
             
             // Term freq is not same for different doc
             virtual bool is_const() const { return false; }
+            virtual common::VALUE_TYPE type() const {
+                return common::VT_DOUBLE;
+            }
             // This op requires per-doc match info
             virtual bool uses_match_info() const { return true; }
             
@@ -186,6 +192,10 @@ namespace argos {
             // Doc length is not same for different doc
             virtual bool is_const() const { return false; }
             
+            virtual common::VALUE_TYPE type() const {
+                return common::VT_INTEGER;
+            }
+            
             // This op requires per-doc match info
             virtual bool uses_match_info() const { return false; }
             
@@ -242,6 +252,9 @@ namespace argos {
             // Term doc count for same term is alway same
             virtual bool is_const() const { return true; }
 
+            virtual common::VALUE_TYPE type() const {
+                return common::VT_INTEGER;
+            }
             // This op doesn't require per-doc match info
             virtual bool uses_match_info() const { return false; }
             
@@ -302,6 +315,10 @@ namespace argos {
             
             // Term doc count for same term is alway same
             virtual bool is_const() const { return true; }
+            
+            virtual common::VALUE_TYPE type() const {
+                return common::VT_DOUBLE;
+            }
             
             // This op doesn't require per-doc match info
             virtual bool uses_match_info() const { return false; }
@@ -388,6 +405,11 @@ namespace argos {
             
             // TFIDF is not same for different doc
             virtual bool is_const() const { return false; }
+
+            virtual common::VALUE_TYPE type() const {
+                return common::VT_DOUBLE;
+            }
+            
             // This op requires per-doc match info
             virtual bool uses_match_info() const { return true; }
             
@@ -501,6 +523,11 @@ namespace argos {
             
             // TFIDF is not same for different doc
             virtual bool is_const() const { return false; }
+
+            virtual common::VALUE_TYPE type() const {
+                return common::VT_DOUBLE;
+            }
+            
             // This op requires per-doc match info
             virtual bool uses_match_info() const { return true; }
             
@@ -594,6 +621,11 @@ namespace argos {
             
             // HAS returned value is not same for different doc
             virtual bool is_const() const { return false; }
+
+            virtual common::VALUE_TYPE type() const {
+                return common::VT_INTEGER;
+            }
+            
             // This op requires per-doc match info
             virtual bool uses_match_info() const { return true; }
             
@@ -646,6 +678,10 @@ namespace argos {
             // Doc count for is alway same
             virtual bool is_const() const { return true; }
 
+            virtual common::VALUE_TYPE type() const {
+                return common::VT_INTEGER;
+            }
+            
             // This op doesn't require per-doc match info
             virtual bool uses_match_info() const { return false; }
             

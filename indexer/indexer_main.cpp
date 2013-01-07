@@ -116,7 +116,7 @@ bool add_documents(istream &is, size_t &line_count, size_t &error_count)
         }
         getline(is, line);
         if (line.empty()) {
-            error_count++;
+            //error_count++;
             continue;
         }
         if(!add_document(line, *context))

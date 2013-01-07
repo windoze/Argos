@@ -92,6 +92,15 @@ namespace argos {
             return true;
         }
 
+        VALUE_TYPE ExprNode::type() const
+        {
+            type_list_t tl(oprands.size(), VT_EMPTY);
+            for (size_t i=0; i<oprands.size(); i++) {
+                tl[i]=oprands[i]->type();
+            }
+            return op->type_inference(tl);
+        }
+        
         Value ExprNode::evaluate(docid did, ExecutionContext &context) const
         {
             return op->evaluate(did, context, oprands);

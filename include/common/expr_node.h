@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 0d0a.com. All rights reserved.
 //
 
+#include <vector>
 #include "common/evaluatable.h"
 
 #ifndef Argos_expr_node_h
@@ -15,6 +16,8 @@ namespace argos {
     namespace common {
         // TODO: use mem_pool_allocator
         typedef field_list_t oprands_t;
+        
+        typedef std::vector<VALUE_TYPE> type_list_t;
 
         /**
          * class Operator is abstract base class of all operators
@@ -43,6 +46,11 @@ namespace argos {
              * Syntax check if the operator is given correct number of oprands
              */
             virtual bool validate_arity(size_t arity) const=0;
+            
+            /**
+             * Determine return type
+             */
+            virtual VALUE_TYPE type_inference(const type_list_t &tl) const=0;
             
             /**
              * Calculate result with given oprands and context
@@ -86,7 +94,13 @@ namespace argos {
              * This is an expression
              */
             virtual int eva_type() const { return ET_EXPR; }
+            
 
+            /**
+             * Returned type determined by operator and oprands
+             */
+            virtual VALUE_TYPE type() const;
+            
             /**
              * This evaluatable is const-foldable only if the operator is const-foldable
              */
