@@ -15,6 +15,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/interprocess/streams/vectorstream.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 #include "query_handler.hpp"
 #include "index/full_index.h"
 #include "query/enquire.h"
@@ -45,7 +47,9 @@ namespace http {
                     // So far we cannot put content into mem_pool as the content may be written out by
                     // other thread, this makes us cannot reset mem_pool before this function exiting.
                     // Use vectorstream.swap_vector to set reply.content, w/o copying and re-allocation
-                    boost::interprocess::basic_vectorstream<std::string> sst;
+                    boost::interprocess::basic_vectorstream<std::string> base_sst;
+                    std::ostream *psst=&base_sst;
+                    
                     size_t qm=req.uri.find('?');
                     if (qm==req.uri.npos) {
                         rep=reply::stock_reply(reply::bad_request);
@@ -59,6 +63,14 @@ namespace http {
                         rep=reply::stock_reply(reply::bad_request);
                         throw argos::argos_logic_error("Request format error");
                     }
+                    namespace io = boost::iostreams;
+                    io::filtering_ostream out;
+                    if(q.comp_) {
+                        out.push(io::gzip_compressor());
+                        out.push(base_sst);
+                        psst=&out;
+                    }
+                    
                     argos::query::Enquire enq;
                     argos::query::dvp_allocator_t da;
                     argos::query::results_t results(da);
@@ -67,22 +79,27 @@ namespace http {
                     // TODO: Use mem_pool to store output content
                     argos::serialization::results_serializer ser(q.fmt.c_str(), q.get_field_list(), total_hits, results.size());
                     argos::common::value_list_t vl;
-                    ser.serialize_prolog(sst);
-                    ser.serialize_histos(sst, q.histos_, histos);
+                    ser.serialize_prolog(*psst);
+                    ser.serialize_histos(*psst, q.histos_, histos);
                     for (int i=0; i<results.size(); i++) {
                         ctx.set_match_info(&results[i].match_info);
                         ctx.get_index()->get_value_list(results[i].did, q.get_field_list(), vl, ctx);
-                        ser.serialize_doc(sst, vl, i);
+                        ser.serialize_doc(*psst, vl, i);
                     }
-                    ser.serialize_epilog(sst);
+                    ser.serialize_epilog(*psst);
                     // No allocation
-                    sst.swap_vector(rep.content);
+                    base_sst.swap_vector(rep.content);
                     rep.status = reply::ok;
-                    rep.headers.resize(2);
+                    rep.headers.resize(2 + (q.comp_ ? 1 : 0));
                     rep.headers[0].name = "Content-Length";
                     rep.headers[0].value = boost::lexical_cast<std::string>(rep.content.size());
                     rep.headers[1].name = "Content-Type";
                     rep.headers[1].value = ser.content_type();
+                    if (q.comp_) {
+                        // Content-Encoding: gzip";
+                        rep.headers[2].name = "Content-Encoding";
+                        rep.headers[2].value = "gzip";
+                    }
                 }
             }
             catch(argos::argos_logic_error &e) {

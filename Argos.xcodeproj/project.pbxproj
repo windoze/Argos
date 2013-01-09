@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2D36D6DE169D541600954C29 /* libboost_iostreams-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D36D6DD169D541600954C29 /* libboost_iostreams-mt.a */; };
 		2D9633EF16881090008E91DE /* analyser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D96334016881090008E91DE /* analyser.cpp */; };
 		2D9633F016881090008E91DE /* text_analyzer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D96334316881090008E91DE /* text_analyzer.cpp */; };
 		2D9633F216881090008E91DE /* argos_match.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2D96334816881090008E91DE /* argos_match.cpp */; };
@@ -123,6 +124,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2D36D6DD169D541600954C29 /* libboost_iostreams-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_iostreams-mt.a"; path = "../../../../opt/local/lib/libboost_iostreams-mt.a"; sourceTree = "<group>"; };
 		2D96333216881060008E91DE /* searcher */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = searcher; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D96334016881090008E91DE /* analyser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = analyser.cpp; sourceTree = "<group>"; };
 		2D96334116881090008E91DE /* char_type.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = char_type.h; sourceTree = "<group>"; };
@@ -295,6 +297,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2D36D6DE169D541600954C29 /* libboost_iostreams-mt.a in Frameworks */,
 				2D96347A1688165F008E91DE /* libboost_filesystem-mt.a in Frameworks */,
 				2D9634781688164D008E91DE /* liblog4cplus.a in Frameworks */,
 				2D96347616881633008E91DE /* libprotobuf.a in Frameworks */,
@@ -324,6 +327,7 @@
 		2D96332716881060008E91DE = {
 			isa = PBXGroup;
 			children = (
+				2D36D6DD169D541600954C29 /* libboost_iostreams-mt.a */,
 				2D9634791688165F008E91DE /* libboost_filesystem-mt.a */,
 				2D9634771688164D008E91DE /* liblog4cplus.a */,
 				2D96347516881633008E91DE /* libprotobuf.a */,

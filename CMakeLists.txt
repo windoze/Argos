@@ -15,7 +15,7 @@ if(ARGOS_BUILD_STATIC)
     set(CMAKE_EXE_LINKER_FLAGS "-static")    
 endif() 
 
-find_package(Boost 1.50.0 COMPONENTS system filesystem thread program_options regex REQUIRED)
+find_package(Boost 1.50.0 COMPONENTS system filesystem thread program_options regex iostreams REQUIRED)
 find_package(ICU 4.8 REQUIRED data i18n uc)
 find_package(Protobuf 2.4 REQUIRED)
 
