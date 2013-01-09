@@ -3,7 +3,7 @@ TODO
 
 BUGS
 ----
-* Escape '"' in CSV serializer for output
+* Escape `"` in CSV serializer for output
 * Argos currently is *not* C++11 clean
 
 Features still missing
@@ -16,9 +16,9 @@ Features still missing
     + Most of things for grouping are done in histogram implementation, only thing left is to record doc ids instead of counting them, a `block_chain<primary_key>` should be enough, another thought is to add sort/nr to each group to limit items output, in such case we need to use random-accessible containers instead of block_chain as it's a linear container just like linked list.
 * Aggregator
 
-    Aggregator can aggregate results from different searchers, as long as each searcher contains different part of doc set. Somethings still need to be considered, the biggest problem is some whole-doc-set values such as DOCCOUNT and IDF, these values cannot be calculated on individual searcher, they need to be collected from all searchers and summarized in aggregator, then we need to transfer these values from to searchers before doing actual search, this may require 2 or more roundtrips between A/S, and may impact performance.
+    + Aggregator can aggregate results from different searchers, as long as each searcher contains different part of doc set. Somethings still need to be considered, the biggest problem is some whole-doc-set values such as DOCCOUNT and IDF, these values cannot be calculated on individual searcher, they need to be collected from all searchers and summarized in aggregator, then we need to transfer these values from to searchers before doing actual search, this may require 2 or more roundtrips between A/S, and may impact performance.
 
-    Despite this issue, other features are pretty easy to be implemented.
+    + Despite this issue, other features are pretty easy to be implemented.
 
 Short/Mid term, need improvement
 --------------------------------
