@@ -88,6 +88,7 @@ URL prefix is `/index_name/query`, following parameters are supported:
 * `fl`, returned fields
 * `h`, histograms
 * `fmt`, return format
+* `c`, compression flag
 
 #### Match condition ####
 
@@ -161,6 +162,10 @@ Histogram specification can also be multiple expressions, in such case, the grou
 * `jsonm`, outputs a JSON file, each document in the result is a map, with field names.
 * `csv`, a CSV-like format used by indexer and searcher, not all info is returned, for test only.
 * `pb`, Google ProtocolBuffers, the `.proto` file is at `Argos/serialization/result.proto`.
+
+#### Compression Flag ####
+
+Query result is gzip-compressed if `c` is `y` or `1`, also 'Content-Encoding' is set to 'gzip', which is compatible with most browsers and HTTP client libraries.
 
 ### Query by Primary Key ###
 
