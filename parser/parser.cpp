@@ -28,7 +28,13 @@ namespace argos {
     namespace parser {
         using namespace common;
         
-        common::eva_ptr_t parse_doc_op(const char *&str, size_t &len, common::ExecutionContext &ctx);
+        inline double get_time()
+        {
+            struct timeval tv;
+            gettimeofday(&tv, NULL);
+            return double(tv.tv_sec)+double(tv.tv_usec)/1000000;
+        }
+        
         bool parse_value_list(const char *&str, size_t &len, value_list_t &vl, ExecutionContext &context)
         {
             value_list_parser<const char*> parser;
@@ -44,200 +50,256 @@ namespace argos {
             return boost::spirit::qi::phrase_parse(first, last, parser, space, v);
         }
         
-        bool parse_expr_list(const char *&str, size_t &len, oprands_t &oprands, ExecutionContext &context)
-        {
-            if (len==0 || !str || !str[0]) { return false;}
-            token t=peek_next_token(str, len);
-            // Empty oprand list
-            if (t.type==TT_RPAREN) {
-                return true;
-            }
-            eva_ptr_t node=parse_expr(str, len, context);
-            if(!node)
-                return false;
-            oprands.push_back(node);
-            while (len>0) {
-                token t=peek_next_token(str, len);
-                switch (t.type) {
-                    case TT_SEMI:
-                        // Segment complete
-                        return true;
-                    case TT_COMMA:
-                    {
-                        // Consume next ','
-                        next_token(str, len);
-                        eva_ptr_t node=parse_expr(str, len, context);
-                        if(!node)
-                            return false;
-                        oprands.push_back(node);
-                    }
-                        break;
-                    case TT_RPAREN:
-                        // Parse completed
-                        return true;
-                    default:
-                        // Oprands list must be seperated by ','
-                        return false;
-                }
-            }
-            return true;
-        }
+        // TODO: Uses something like Operator registration
+        // @ref argos_ri_backend/doc_ops.cpp
+        common::eva_ptr_t create_doc_op(const std::string &name, const std::string &field, const std::string &text, common::ExecutionContext &ctx);
         
-        inline double get_time()
-        {
-            struct timeval tv;
-            gettimeofday(&tv, NULL);
-            return double(tv.tv_sec)+double(tv.tv_usec)/1000000;
+        // TODO: Optimize this
+        // A set of adaptor classes, work with Boost.Spirit
+        struct Composer {
+            struct ExprComposer;
+            
+            typedef std::vector<ExprComposer> ExprListComposer;
+            typedef std::vector<ExprComposer> OprandsComposer;
+            
+            struct FieldComposer {
+                FieldComposer() {}
+                FieldComposer(const std::string & identifier)
+                : identifier_(identifier) {}
+                std::string identifier_;
+            };
+            
+            struct ConstantComposer {
+                ConstantComposer() {}
+                ConstantComposer(const common::Value &v)
+                : value(v) {}
+                common::Value value;
+            };
+            
+            struct FunctionComposer {
+                FunctionComposer() {}
+                FunctionComposer(const std::pair<std::string, OprandsComposer> &call)
+                : identifier_(call.first)
+                , oprands_(call.second)
+                {}
+                std::string identifier_;
+                OprandsComposer oprands_;
+            };
+            
+            struct DocOpComposer {
+                DocOpComposer() {}
+                
+                DocOpComposer(const boost::tuple<std::string, boost::optional<std::string>, boost::optional<std::string> > &doc_op_call)
+                : identifier_(doc_op_call.get<0>())
+                , field_(doc_op_call.get<1>() ? *doc_op_call.get<1>() : "")
+                , text_(doc_op_call.get<2>() ? *doc_op_call.get<2>() : "")
+                {}
+                std::string identifier_;
+                std::string field_;
+                std::string text_;
+            };
+            
+            struct ExprComposer {
+                ExprComposer() : type(common::ET_NONE) {
+                    // Default
+                }
+                
+                ExprComposer(const ConstantComposer &c)
+                : type(common::ET_CONST)
+                , value(c.value)
+                {
+                    // Constant
+                }
+                
+                explicit ExprComposer(const FunctionComposer &c)
+                : type(common::ET_EXPR)
+                , identifier_(c.identifier_)
+                , oprands_(c.oprands_)
+                {
+                    // Function
+                }
+                
+                explicit ExprComposer(const DocOpComposer &c)
+                : type(common::ET_DOC)
+                , identifier_(c.identifier_)
+                , field_(c.field_)
+                , text_(c.text_)
+                {
+                    // DocOp
+                }
+                
+                ExprComposer(const FieldComposer &c)
+                : type(common::ET_ATTR)
+                , identifier_(c.identifier_)
+                {
+                    // Field or Named Constants
+                }
+                
+                eva_ptr_t compose_expr(ExecutionContext &context) const {
+                    expr_ptr_t ex(new ExprNode(identifier_.c_str()));
+                    if(!ex->op)
+                        throw argos_bad_operator(identifier_.c_str());;
+                    ex->oprands.resize(oprands_.size());
+                    for (size_t i=0; i<oprands_.size(); ++i) {
+                        ex->oprands[i]=oprands_[i].compose(context);
+                    }
+                    return ex;
+                }
+                
+                eva_ptr_t compose_field(ExecutionContext &context) const {
+                    // Named Constants
+                    if (identifier_=="PI") {
+                        eva_ptr_t(new common::Constant(common::Value(3.141592653589793)));
+                    }
+                    if (identifier_=="E") {
+                        eva_ptr_t(new common::Constant(common::Value(2.718281828459045)));
+                    }
+                    if (identifier_=="SOFA") {
+                        eva_ptr_t(new common::Constant(common::Value(2.207416099162478)));
+                    }
+                    if (identifier_=="NOW") {
+                        eva_ptr_t(new common::Constant(common::Value(get_time())));
+                    }
+                    
+                    // Or Fields
+                    int fid=context.get_field_config()->get_field_id(identifier_.c_str());
+                    if (fid<0) {
+                        throw argos_bad_field(std::string(identifier_.c_str()).c_str());
+                    }
+                    field_eva_cache_t::const_iterator i=context.field_eva_cache.find(fid);
+                    if(i==context.field_eva_cache.end())
+                    {
+                        eva_ptr_t e=eva_ptr_t(new index::FieldEvaluator(context.get_field_config(), fid));
+                        context.field_eva_cache[fid]=e;
+                        return e;
+                    }
+                    return i->second;
+                }
+                
+                eva_ptr_t compose_docop(ExecutionContext &context) const {
+                    return create_doc_op(identifier_, field_, text_, context);
+                }
+                
+                eva_ptr_t compose(ExecutionContext &context) const {
+                    switch(type) {
+                        case common::ET_NONE:
+                            break;
+                        case common::ET_CONST:
+                            return eva_ptr_t(new common::Constant(value));
+                            break;
+                        case common::ET_EXPR:
+                            return compose_expr(context);
+                            break;
+                        case common::ET_DOC:
+                            return compose_docop(context);
+                            break;
+                        case common::ET_ATTR:
+                            return compose_field(context);
+                            break;
+                    }
+                    throw argos_syntax_error("Syntax error in expression");
+                    return eva_ptr_t();
+                }
+                
+                common::EVA_TYPE type;
+                common::Value value;
+                std::string identifier_;
+                OprandsComposer oprands_;
+                boost::optional<std::pair<boost::optional<std::string>, boost::optional<std::string> > > doc_oprands_;
+                std::string field_;
+                std::string text_;
+            };
+            
+            typedef std::pair<ExprComposer, bool> sort_criterion;
+            typedef std::vector<sort_criterion> sort_criteria;
+            typedef std::vector<ExprListComposer> histograms;
+        };
+        
+        std::ostream &operator<<(std::ostream &os, const Composer::ExprComposer &comp) {
+            switch(comp.type) {
+                case common::ET_NONE:
+                    os << "<NULL>";
+                    break;
+                case common::ET_CONST:
+                    common::Constant(comp.value).serialize(os);
+                    break;
+                case common::ET_EXPR:
+                    os << comp.identifier_ << "(...)";
+                    break;
+                case common::ET_DOC:
+                    os << '@' << comp.identifier_ << "(...)";
+                    break;
+                case common::ET_ATTR:
+                    os << comp.identifier_;
+                    break;
+            }
+            return os;
         }
         
         eva_ptr_t parse_expr(const char *&str, size_t &len, ExecutionContext &context)
         {
-            // TODO: Error report
-            token t=next_token(str, len);
-            switch (t.type) {
-                case TT_INT:
-                case TT_FLOAT:
-                case TT_FPAIR:
-                case TT_STR:
-                case TT_ARRAY:
-                    // Return const
-                    // TODO: ensure t.sz size constraints
-                    // TODO: Use mem_pool_allocator
-                {
-                    Value v;
-                    if(parse_value(t.p, t.p+t.sz, v)) {
-                        return eva_ptr_t(new Constant(v));
-                    }
-                    throw argos_syntax_error("Syntax error in expression");
-                }
-                case TT_AT:
-                {
-                    return parse_doc_op(str, len, context);
-                }
-                case TT_ID:
-                {
-                    token tn=peek_next_token(str, len);
-                    if (tn.type==TT_COLON) {
-                        // Consume colon
-                        next_token(str, len);
-                        eva_ptr_t expr=parse_expr(str, len, context);
-                        if (expr) {
-                            expr->set_name(std::string(t.p, t.sz));
-                        }
-                        return expr;
-                    } else {
-                        if (t.sz==1 && t.p[0]=='E') {
-                            return eva_ptr_t(new common::Constant(common::Value(2.718281828459045)));
-                        } else if (t.sz==2 && t.p[0]=='P' && t.p[1]=='I') {
-                            return eva_ptr_t(new common::Constant(common::Value(3.141592653589793)));
-                        } else if (t.sz==3 && t.p[0]=='N' && t.p[1]=='O' && t.p[2]=='W') {
-                            return eva_ptr_t(new common::Constant(common::Value(get_time())));
-                        } else if (t.sz==4 && t.p[0]=='S' && t.p[1]=='O' && t.p[2]=='F' && t.p[3]=='A') {
-                            // Moving sofa constant :)
-                            return eva_ptr_t(new common::Constant(common::Value(2.207416099162478)));
-                        }
-                        token tn=peek_next_token(str, len);
-                        if (tn.type!=TT_LPAREN) {
-                            // TODO: Use mem_pool_allocator
-                            // Generate FieldEvaluator
-#if 0
-                            return eva_ptr_t(new index::FieldEvaluator(context.get_field_config(), t.p, t.sz));
-#else
-                            int fid=context.get_field_config()->get_field_id(t.p, t.sz);
-                            if (fid<0) {
-                                throw argos_bad_field(std::string(t.p, t.sz).c_str());
-                            }
-                            field_eva_cache_t::const_iterator i=context.field_eva_cache.find(fid);
-                            if(i==context.field_eva_cache.end())
-                            {
-                                eva_ptr_t e=eva_ptr_t(new index::FieldEvaluator(context.get_field_config(), fid));
-                                context.field_eva_cache[fid]=e;
-                                return e;
-                            }
-                            return i->second;
-#endif
-                        }
-                        
-                        // TODO: Use mem_pool_allocator
-                        expr_ptr_t node=expr_ptr_t(new ExprNode(t.p, t.sz));
-                        if (!node->op) {
-                            // Undefined operator
-                            throw argos_bad_operator(std::string(t.p, t.sz).c_str());
-                            return eva_ptr_t();
-                        }
-                        // Consume '('
-                        token tp=next_token(str, len);
-                        if (tp.type!=TT_LPAREN) {
-                            // Operator must be followed by '('
-                            throw argos_syntax_error("Operator must be followed by '('");
-                            return eva_ptr_t();
-                        }
-                        if (!parse_expr_list(str, len, node->oprands, context)) {
-                            return eva_ptr_t();
-                        }
-                        // Consume ')'
-                        tp=next_token(str, len);
-                        if (tp.type!=TT_RPAREN) {
-                            // Missing ')'
-                            throw argos_syntax_error("Missing ')'");
-                            return eva_ptr_t();
-                        }
-                        // Validate arity
-                        if (!node->op->validate_arity(node->oprands.size())) {
-                            // Wrong number of oprands
-                            throw argos_syntax_error("Wrong number of arguments");
-                            return eva_ptr_t();
-                        }
-                        return optimize(node, context);
-                        //return node;
-                    }
-                }
-                    break;
+            expr_parser<const char *, Composer> parser;
+            boost::spirit::ascii::space_type space;
+            Composer::ExprComposer comp;
+            if(!boost::spirit::qi::phrase_parse(str, str+len, parser, space, comp)) {
+                throw argos_syntax_error("Syntax error in expression");
             }
-            // Expression can only be constants or ID(...)
-            throw argos_syntax_error("Syntax error in expression");
+            eva_ptr_t e=comp.compose(context);
+            // return optimize(e, context)
+            return e;
         }
-        
-        bool parse_sort_crit(const char *&str, size_t &len, query::sort_criteria &sort_crit, ExecutionContext &context)
+
+        bool parse_expr_list(const char *&str, size_t &len, oprands_t &oprands, ExecutionContext &context)
         {
-            query::sort_criterion sc;
-            while (len>0) {
-                sc.sort_key=parse_expr(str, len, context);
-                if (!sc.sort_key) {
-                    return false;
-                }
-                if (len==0) {
-                    // Default is ascending sort
-                    sc.desc=false;
-                    sort_crit.push_back(sc);
-                    return true;
-                }
-                token t=next_token(str, len);
-                if (t.type!=TT_COMMA) {
-                    return false;
-                }
-                t=next_token(str, len);
-                if (t.type!=TT_ID) {
-                    return false;
-                }
-                if ((t.p[0]=='a') || (t.p[0]=='A')) {
-                    sc.desc=false;
-                } else if ((t.p[0]=='d') || (t.p[0]=='D')) {
-                    sc.desc=true;
-                } else {
-                    return false;
-                }
-                sort_crit.push_back(sc);
-                if (len>0) {
-                    t=next_token(str, len);
-                    if (t.type!=TT_COMMA && len>0) {
-                        return false;
-                    }
-                }
+            expr_list_parser<const char *, Composer> parser;
+            boost::spirit::ascii::space_type space;
+            Composer::ExprListComposer comp;
+            if(!boost::spirit::qi::phrase_parse(str, str+len, parser, space, comp)) {
+                throw argos_syntax_error("Syntax error in expression");
+            }
+            oprands.resize(comp.size());
+            for(size_t i=0; i<comp.size(); i++) {
+                oprands[i]=comp[i].compose(context);
+                std::cout << oprands[i] << std::endl;
             }
             return true;
         }
         
+        bool parse_sort_crit(const char *&str, size_t &len, query::sort_criteria &sort_crit, ExecutionContext &context)
+        {
+            sort_criteria_parser<const char *, Composer> parser;
+            boost::spirit::ascii::space_type space;
+            Composer::sort_criteria crit;
+            if(!boost::spirit::qi::phrase_parse(str, str+len, parser, space, crit)) {
+                throw argos_syntax_error("Syntax error");
+            }
+            sort_crit.resize(crit.size());
+            for(size_t i=0; i<crit.size(); i++) {
+                sort_crit[i].sort_key=crit[i].first.compose(context);
+                sort_crit[i].desc=crit[i].second;
+            }
+            return true;
+        }
+        
+        // expr,expr;expr,expr,expr;...;expr,expr
+        bool parse_groups(const char *&str, size_t &len, std::vector<common::field_list_t> &groups, common::ExecutionContext &context)
+        {
+            histo_parser<const char *, Composer> parser;
+            boost::spirit::ascii::space_type space;
+            Composer::histograms comp;
+            if(!boost::spirit::qi::phrase_parse(str, str+len, parser, space, comp)) {
+                throw argos_syntax_error("Syntax error");
+            }
+            groups.resize(comp.size());
+            for(size_t i=0; i<comp.size(); ++i) {
+                groups[i].resize(comp[i].size());
+                for(size_t j=0; j<comp[i].size(); ++j) {
+                    groups[i][j]=comp[i][j].compose(context);
+                }
+            }
+            return true;
+        }
+
         bool parse_field_list(const char *&str, size_t &len, field_list_t &fl, ExecutionContext &context)
         {
             return parse_expr_list(str, len, fl, context);
@@ -259,25 +321,6 @@ namespace argos {
             return impl_->parse(str, len, context);
         }
         
-        // expr,expr;expr,expr,expr;...;expr,expr
-        bool parse_groups(const char *&str, size_t &len, std::vector<common::field_list_t> &groups, common::ExecutionContext &context)
-        {
-            while (len>0) {
-                field_list_t fl;
-                if(!parse_field_list(str, len, fl, context)) {
-                    return false;
-                }
-                groups.push_back(fl);
-                if (len>0) {
-                    token t=next_token(str, len);
-                    if (t.type!=TT_SEMI) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-
         bool parse_query(const char *fmt, size_t fmt_len,
                          const char *match, size_t match_len,
                          const char *filter, size_t filter_len,
@@ -288,6 +331,7 @@ namespace argos {
                          const char *field_list, size_t field_list_len,
                          const char *id_list, size_t id_list_len,
                          const char *qid, size_t qid_len,
+                         const char *c, size_t c_len,
                          query::Query &q,
                          common::ExecutionContext &context)
         {
@@ -305,6 +349,13 @@ namespace argos {
             } else {
                 q.fmt="XML";
             }
+
+            if (c_len>0 && (c[0]=='1' || c[0]=='y' || c[0]=='Y')) {
+                q.comp_=true;
+            } else {
+                q.comp_=false;
+            }
+
             if (match_len>0 && match[0]) {
                 if (match_len==1 && match[0]=='*') {
                     // '*' to do full table scan
@@ -488,6 +539,8 @@ namespace argos {
             size_t id_list_len=0;
             const char *qid=NULL;
             size_t qid_len=0;
+            const char *c=NULL;
+            size_t c_len=0;
             
             while (next_param(req, len, param, param_len)) {
                 const char *key=param;
@@ -593,6 +646,15 @@ namespace argos {
                         qid=buf;
                         qid_len=buf_len;
                         //std::cout << "queryid:" << std::string(buf, buf_len) << std::endl;
+                    } else if (strncasecmp(key, "c", key_len)==0) {
+                        c=value;
+                        c_len=value_len;
+                        char *buf=alloc_string(ctx.temp_pool, c_len);
+                        size_t buf_len=urldecode(buf, c, c_len);
+                        buf[buf_len]=0;
+                        c=buf;
+                        c_len=buf_len;
+                        //std::cout << "compress:" << std::string(buf, buf_len) << std::endl;
                     } else {
                         // TODO: Unknown param
                     }
@@ -611,6 +673,7 @@ namespace argos {
                                field_list, field_list_len,
                                id_list, id_list_len,
                                qid, qid_len,
+                               c, c_len,
                                q,
                                ctx);
         }

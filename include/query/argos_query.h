@@ -76,6 +76,8 @@ namespace argos {
             common::field_list_t fl_;
             // Query ID
             std::string query_id_;
+            // Compress?
+            bool comp_;
         };
     }   // End of namespace query
 }   // End of namespace argos

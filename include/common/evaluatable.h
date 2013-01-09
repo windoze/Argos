@@ -18,6 +18,7 @@
 namespace argos {
     namespace common {
         typedef enum {
+            ET_NONE=0,
             ET_CONST=1,
             ET_EXPR=2,
             ET_ATTR=3,

@@ -669,259 +669,30 @@ namespace argos {
         };
     }   // End of namespace query
     namespace parser {
-        common::eva_ptr_t parse_doc_op(const char *&str, size_t &len, common::ExecutionContext &ctx)
+        common::eva_ptr_t create_doc_op(const std::string &name, const std::string &field, const std::string &text, common::ExecutionContext &ctx)
         {
-            // Leading '@' is already parsed
-            using namespace common;
-            token t=next_token(str, len);
-            if (t.type!=TT_ID) {
-                return eva_ptr_t();
+            if (name=="TC") {
+                return common::eva_ptr_t(new query::TcDocOpNode(text, field, ctx));
+            } else if (name=="TF") {
+                return common::eva_ptr_t(new query::TfDocOpNode(text, field, ctx));
+            } else if (name=="DL") {
+                // TODO: text must be empty
+                return common::eva_ptr_t(new query::DlDocOpNode(field, ctx));
+            } else if (name=="DC") {
+                return common::eva_ptr_t(new query::DcDocOpNode(text, field, ctx));
+            } else if (name=="IDF") {
+                return common::eva_ptr_t(new query::IdfDocOpNode(text, field, ctx));
+            } else if (name=="TFIDF") {
+                return common::eva_ptr_t(new query::TfidfDocOpNode(text, field, ctx));
+            } else if (name=="NTFIDF") {
+                return common::eva_ptr_t(new query::NtfidfDocOpNode(text, field, ctx));
+            } else if (name=="HAS") {
+                return common::eva_ptr_t(new query::HasDocOpNode(text, field, ctx));
+            } else if (name=="DOCCOUNT") {
+                // TODO: No text and field
+                return common::eva_ptr_t(new query::DoccountDocOpNode(ctx));
             }
-            std::string op(t.p, t.sz);
-            if (op=="TC") {
-                // Parse TC("term")
-                t=next_token(str, len);
-                if (t.type!=TT_LPAREN) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                t=next_token(str, len);
-                std::string term;
-                std::string field;
-                if (t.type==TT_ID) {
-                    field=std::string(t.p, t.sz);
-                    t=next_token(str, len);
-                    if (t.type!=TT_COMMA) {
-                        throw argos_syntax_error("Syntax error in match");
-                    }
-                    t=next_token(str, len);
-                }
-                if (t.type==TT_STR) {
-                    term=std::string(t.p+1, t.sz-2);
-                } else if (t.type==TT_INT) {
-                    term=std::string(t.p, t.sz);
-                } else if (t.type==TT_FLOAT) {
-                    term=std::string(t.p, t.sz);
-                } else {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                t=next_token(str, len);
-                if (t.type!=TT_RPAREN) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                return eva_ptr_t(new query::TcDocOpNode(term, field, ctx));
-            } else if (op=="TF") {
-                // Parse TF("term")
-                t=next_token(str, len);
-                if (t.type!=TT_LPAREN) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                t=next_token(str, len);
-                std::string term;
-                std::string field;
-                if (t.type==TT_ID) {
-                    field=std::string(t.p, t.sz);
-                    t=next_token(str, len);
-                    if (t.type!=TT_COMMA) {
-                        throw argos_syntax_error("Syntax error in match");
-                    }
-                    t=next_token(str, len);
-                }
-                if (t.type==TT_STR) {
-                    term=std::string(t.p+1, t.sz-2);
-                } else if (t.type==TT_INT) {
-                    term=std::string(t.p, t.sz);
-                } else if (t.type==TT_FLOAT) {
-                    term=std::string(t.p, t.sz);
-                } else {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                t=next_token(str, len);
-                if (t.type!=TT_RPAREN) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                return eva_ptr_t(new query::TfDocOpNode(term,field,ctx));
-            } else if (op=="TFIDF") {
-                // Parse TFIDF("term")
-                t=next_token(str, len);
-                if (t.type!=TT_LPAREN) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                t=next_token(str, len);
-                std::string term;
-                std::string field;
-                if (t.type==TT_ID) {
-                    field=std::string(t.p, t.sz);
-                    t=next_token(str, len);
-                    if (t.type!=TT_COMMA) {
-                        throw argos_syntax_error("Syntax error in match");
-                    }
-                    t=next_token(str, len);
-                }
-                if (t.type==TT_STR) {
-                    term=std::string(t.p+1, t.sz-2);
-                } else if (t.type==TT_INT) {
-                    term=std::string(t.p, t.sz);
-                } else if (t.type==TT_FLOAT) {
-                    term=std::string(t.p, t.sz);
-                } else {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                t=next_token(str, len);
-                if (t.type!=TT_RPAREN) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                return eva_ptr_t(new query::TfidfDocOpNode(term,field,ctx));
-            } else if (op=="NTFIDF") {
-                // Parse NTFIDF("term")
-                t=next_token(str, len);
-                if (t.type!=TT_LPAREN) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                t=next_token(str, len);
-                std::string term;
-                std::string field;
-                if (t.type==TT_ID) {
-                    field=std::string(t.p, t.sz);
-                    t=next_token(str, len);
-                    if (t.type!=TT_COMMA) {
-                        throw argos_syntax_error("Syntax error in match");
-                    }
-                    t=next_token(str, len);
-                }
-                if (t.type==TT_STR) {
-                    term=std::string(t.p+1, t.sz-2);
-                } else if (t.type==TT_INT) {
-                    term=std::string(t.p, t.sz);
-                } else if (t.type==TT_FLOAT) {
-                    term=std::string(t.p, t.sz);
-                } else {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                t=next_token(str, len);
-                if (t.type!=TT_RPAREN) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                return eva_ptr_t(new query::NtfidfDocOpNode(term,field,ctx));
-            } else if (op=="HAS") {
-                // Parse HAS(field,"term")
-                t=next_token(str, len);
-                if (t.type!=TT_LPAREN) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                t=next_token(str, len);
-                if (t.type!=TT_ID) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                std::string field(t.p, t.sz);
-                t=next_token(str, len);
-                if (t.type!=TT_COMMA) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                std::string term;
-                t=next_token(str, len);
-                if (t.type==TT_STR) {
-                    term=std::string(t.p+1, t.sz-2);
-                } else if (t.type==TT_INT) {
-                    term=std::string(t.p, t.sz);
-                } else if (t.type==TT_FLOAT) {
-                    term=std::string(t.p, t.sz);
-                } else {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                t=next_token(str, len);
-                if (t.type!=TT_RPAREN) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                return eva_ptr_t(new query::HasDocOpNode(term, field,ctx));
-            } else if (op=="DC") {
-                // Parse DC("term")
-                t=next_token(str, len);
-                if (t.type!=TT_LPAREN) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                t=next_token(str, len);
-                std::string term;
-                std::string field;
-                if (t.type==TT_ID) {
-                    field=std::string(t.p, t.sz);
-                    t=next_token(str, len);
-                    if (t.type!=TT_COMMA) {
-                        throw argos_syntax_error("Syntax error in match");
-                    }
-                    t=next_token(str, len);
-                }
-                if (t.type==TT_STR) {
-                    term=std::string(t.p+1, t.sz-2);
-                } else if (t.type==TT_INT) {
-                    term=std::string(t.p, t.sz);
-                } else if (t.type==TT_FLOAT) {
-                    term=std::string(t.p, t.sz);
-                } else {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                t=next_token(str, len);
-                if (t.type!=TT_RPAREN) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                return eva_ptr_t(new query::DcDocOpNode(term,field,ctx));
-            } else if (op=="IDF") {
-                // Parse IDF("term")
-                t=next_token(str, len);
-                if (t.type!=TT_LPAREN) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                t=next_token(str, len);
-                std::string term;
-                std::string field;
-                if (t.type==TT_ID) {
-                    field=std::string(t.p, t.sz);
-                    t=next_token(str, len);
-                    if (t.type!=TT_COMMA) {
-                        throw argos_syntax_error("Syntax error in match");
-                    }
-                    t=next_token(str, len);
-                }
-                if (t.type==TT_STR) {
-                    term=std::string(t.p+1, t.sz-2);
-                } else if (t.type==TT_INT) {
-                    term=std::string(t.p, t.sz);
-                } else if (t.type==TT_FLOAT) {
-                    term=std::string(t.p, t.sz);
-                } else {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                t=next_token(str, len);
-                if (t.type!=TT_RPAREN) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                return eva_ptr_t(new query::IdfDocOpNode(term,field,ctx));
-            } else if (op=="DL") {
-                // Parse DL or DL(field)
-                t=peek_next_token(str, len);
-                if (t.type!=TT_LPAREN) {
-                    return eva_ptr_t(new query::DlDocOpNode("", ctx));
-                }
-                // Consume next '('
-                t=next_token(str, len);
-                // Get field name
-                t=next_token(str, len);
-                std::string field;
-                if (t.type==TT_ID) {
-                    field=std::string(t.p, t.sz);
-                } else {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                t=next_token(str, len);
-                if (t.type!=TT_RPAREN) {
-                    throw argos_syntax_error("Syntax error in match");
-                }
-                return eva_ptr_t(new query::DlDocOpNode(field,ctx));
-            } else if (op=="DOCCOUNT") {
-                return eva_ptr_t(new query::DoccountDocOpNode(ctx));
-            } else {
-                //
-            }
-            throw argos_syntax_error("Syntax error in match");
+            throw argos_syntax_error("Unknown Doc Operator");
         }
-    }
+    }   // End of namespace parser
 }   // End of namespace argos

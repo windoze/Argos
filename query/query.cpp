@@ -13,6 +13,7 @@ namespace argos {
         Query::Query()
         : nr_(0)
         , sk_(0)
+        , comp_(false)
         {}
         
         bool Query::uses_match_info() const {
@@ -117,8 +118,11 @@ namespace argos {
                 }
             }
             sst << "&fmt=" << fmt;
+            if (comp_) {
+                sst << "&c=y";
+            }
             if (!query_id_.empty()) {
-                sst << "&queryid=" << query_id_;
+                sst << "&query_id_=" << query_id_;
             }
             return sst.str();
         }
