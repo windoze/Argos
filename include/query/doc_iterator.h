@@ -196,6 +196,10 @@ namespace argos {
                             children_.push_back(*i);
                         }
                     }
+                    if(children_.size()==0) {
+                        // TODO: Should we add a match_all here?
+                        throw argos_syntax_error("Syntax error in match");
+                    }
                     current_=first_valid();
                 }
                 
@@ -210,7 +214,11 @@ namespace argos {
                             children_.push_back(*i);
                         }
                     }
-                    current_=first_valid();
+                    if(children_.size()==0) {
+                        // TODO: Should we add a match_all here?
+                        throw argos_syntax_error("Syntax error in match");
+                    }
+                   current_=first_valid();
                 }
                 
                 virtual bool end() const
@@ -319,6 +327,10 @@ namespace argos {
                             }
                         }
                     }
+                    if(children_heap_.size()==0) {
+                        // TODO: Should we add a match_all here?
+                        throw argos_syntax_error("Syntax error in match");
+                    }
                     current_=children_heap_.top()->get_docid();
                 }
                 
@@ -336,6 +348,10 @@ namespace argos {
                                 children_heap_.push(*i);
                             }
                         }
+                    }
+                    if(children_heap_.size()==0) {
+                        // TODO: Should we add a match_all here?
+                        throw argos_syntax_error("Syntax error in match");
                     }
                     current_=children_heap_.top()->get_docid();
                 }
