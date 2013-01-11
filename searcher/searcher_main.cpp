@@ -113,8 +113,35 @@ int main(int argc, const char * argv[])
     string log_config;
     int thr;
 
+    if (vm.count("log-config")) {
+        log_config=vm["log-config"].as<string>();
+    }
+    
+    if (log_config.empty()) {
+        BasicConfigurator config;
+        config.configure();
+    } else {
+        PropertyConfigurator config(log_config);
+        config.configure();
+    }
+    Logger logger = Logger::getInstance("main");
+    char cwd[1024];
+    LOG4CPLUS_INFO(logger, "Searcher start running at " << getcwd(cwd, 1024));
+    for (int i=0; i<argc; i++) {
+        LOG4CPLUS_DEBUG(logger, "Command line option: " << argv[i]);
+    }
+    
+    if (log_config.empty()) {
+        LOG4CPLUS_DEBUG(logger, "Using empty log config");
+    } else {
+        LOG4CPLUS_DEBUG(logger, "Using log config " << log_config);
+    }
+    
     if (vm.count("index-dir")) {
         index_dirs=vm["index-dir"].as<vector<string> >();
+    }
+    for(size_t i=0; i<index_dirs.size(); i++) {
+        LOG4CPLUS_DEBUG(logger, "Using index at " << index_dirs[i]);
     }
     
     if (vm.count("listen-addr")) {
@@ -129,30 +156,21 @@ int main(int argc, const char * argv[])
     } else {
         port="8765";
     }
+    LOG4CPLUS_DEBUG(logger, "Listening at " << addr << ':' << port);
     
     if (vm.count("doc-root")) {
         doc_root=vm["doc-root"].as<string>();
     } else {
         doc_root="./www";
     }
+    LOG4CPLUS_DEBUG(logger, "Document root at " << doc_root);
     
     if (vm.count("threads")) {
         thr=vm["threads"].as<int>();
     } else {
         thr=3;
     }
-    
-    if (vm.count("log-config")) {
-        log_config=vm["log-config"].as<string>();
-    }
-    
-    if (log_config.empty()) {
-        BasicConfigurator config;
-        config.configure();
-    } else {
-        PropertyConfigurator config(log_config);
-        config.configure();
-    }
+    LOG4CPLUS_DEBUG(logger, "Server threads " << thr);
     
     start_server(index_dirs,
                  addr.c_str(),
