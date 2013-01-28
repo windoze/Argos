@@ -182,10 +182,10 @@ namespace http {
                 url_decode(data, doc);
                 if (req.uri[qm-6]=='i') {
                     // insert
-                    the_update_thread_proc_->insert_or_update_document(std::make_pair<int, std::string>(INSERT_COMMAND, doc));
+                    the_update_thread_proc_->insert_or_update_document(std::make_pair(INSERT_COMMAND, doc));
                 } else if (req.uri[qm-6]=='u') {
                     // update
-                    the_update_thread_proc_->insert_or_update_document(std::make_pair<int, std::string>(UPDATE_COMMAND, doc));
+                    the_update_thread_proc_->insert_or_update_document(std::make_pair(UPDATE_COMMAND, doc));
                 } else {
                     // TODO: Error
                 }
