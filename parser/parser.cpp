@@ -260,7 +260,7 @@ namespace argos {
             oprands.resize(comp.size());
             for(size_t i=0; i<comp.size(); i++) {
                 oprands[i]=comp[i].compose(context);
-                std::cout << oprands[i] << std::endl;
+                //std::cout << oprands[i] << std::endl;
             }
             return true;
         }
