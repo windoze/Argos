@@ -11,6 +11,7 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #endif
 
+#include <strings.h>
 #include <math.h>
 #include <map>
 #include <boost/regex.hpp>
@@ -77,7 +78,13 @@ namespace argos {
                     return int(operators.size()-1);
                 }
                 
-                typedef std::map<std::string, int> name_map_t;
+                struct iless {
+                    bool operator()(const char *a, const char *b) const {
+                        return strcasecmp(a, b)<0;
+                    }
+                };
+                
+                typedef std::map<const char *, int, iless> name_map_t;
                 name_map_t name_map;
                 std::vector<Operator *> operators;
                 static OperatorFactory *the_instance;
