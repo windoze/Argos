@@ -41,6 +41,7 @@ namespace argos {
                 perror("XXX");
                 base=0;
             }
+            posix_madvise(base, size, POSIX_MADV_RANDOM | POSIX_MADV_WILLNEED);
             return base;
         }
         
