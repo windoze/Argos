@@ -1,4 +1,7 @@
 package argos.serialization.protobuf;
+option optimize_for = SPEED;
+option java_package = "com.0d0a.argos";
+option java_outer_classname = "QueryResult";
 message GeoLocation {
 	required float latitude=1;
 	required float longitude=2;
