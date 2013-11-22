@@ -11,6 +11,21 @@
 #include "common/value.h"
 
 namespace argos {
+    namespace details {
+        inline int safe_strcmp(const char *l, const char *r) {
+            if (l==r) {
+                return 0;
+            }
+            if (l==NULL) {
+                return -1;
+            }
+            if (r==NULL) {
+                return 1;
+            }
+            return strcmp(l, r);
+        }
+    }   // End of namespace details
+    
     namespace common {
         Value ArrayValue::get_element(size_t index) const {
             Value ret;
@@ -366,7 +381,7 @@ namespace argos {
                     ret.number=v1.cast(VT_DOUBLE).dnumber<v2.cast(VT_DOUBLE).dnumber ? 1 : 0;
                     break;
                 case VT_STRING:
-                    ret.number=strcmp(v1.string, v2.string)<0;
+                    ret.number=details::safe_strcmp(v1.string, v2.string)<0;
                     break;
                 default:
                     break;
@@ -391,7 +406,7 @@ namespace argos {
                     ret.number=v1.cast(VT_DOUBLE).dnumber<=v2.cast(VT_DOUBLE).dnumber ? 1 : 0;
                     break;
                 case VT_STRING:
-                    ret.number=strcmp(v1.string, v2.string)<=0;
+                    ret.number=details::safe_strcmp(v1.string, v2.string)<=0;
                     break;
                 default:
                     break;
@@ -416,7 +431,7 @@ namespace argos {
                     ret.number=v1.cast(VT_DOUBLE).dnumber>v2.cast(VT_DOUBLE).dnumber ? 1 : 0;
                     break;
                 case VT_STRING:
-                    ret.number=strcmp(v1.string, v2.string)>0;
+                    ret.number=details::safe_strcmp(v1.string, v2.string)>0;
                     break;
                 default:
                     break;
@@ -441,7 +456,7 @@ namespace argos {
                     ret.number=v1.cast(VT_DOUBLE).dnumber>=v2.cast(VT_DOUBLE).dnumber ? 1 : 0;
                     break;
                 case VT_STRING:
-                    ret.number=strcmp(v1.string, v2.string)>=0;
+                    ret.number=details::safe_strcmp(v1.string, v2.string)>=0;
                     break;
                 default:
                     break;
@@ -466,7 +481,7 @@ namespace argos {
                     ret.number=v1.cast(VT_DOUBLE).dnumber==v2.cast(VT_DOUBLE).dnumber ? 1 : 0;
                     break;
                 case VT_STRING:
-                    ret.number=strcmp(v1.string, v2.string)==0;
+                    ret.number=details::safe_strcmp(v1.string, v2.string)==0;
                     break;
                 default:
                     break;
@@ -491,7 +506,7 @@ namespace argos {
                     ret.number=v1.cast(VT_DOUBLE).dnumber!=v2.cast(VT_DOUBLE).dnumber ? 1 : 0;
                     break;
                 case VT_STRING:
-                    ret.number=strcmp(v1.string, v2.string)!=0;
+                    ret.number=details::safe_strcmp(v1.string, v2.string)!=0;
                     break;
                 default:
                     break;
