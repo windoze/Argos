@@ -124,7 +124,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		2D36D6DD169D541600954C29 /* libboost_iostreams-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_iostreams-mt.a"; path = "../../../../opt/local/lib/libboost_iostreams-mt.a"; sourceTree = "<group>"; };
+		2D36D6DD169D541600954C29 /* libboost_iostreams-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_iostreams-mt.a"; path = "../../../../usr/local/lib/libboost_iostreams-mt.a"; sourceTree = "<group>"; };
 		2D96333216881060008E91DE /* searcher */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = searcher; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D96334016881090008E91DE /* analyser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = analyser.cpp; sourceTree = "<group>"; };
 		2D96334116881090008E91DE /* char_type.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = char_type.h; sourceTree = "<group>"; };
@@ -280,16 +280,15 @@
 		2D96345B16881102008E91DE /* indexer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = indexer; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D96345E168813B8008E91DE /* result.pb.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = result.pb.cc; sourceTree = "<group>"; };
 		2D96345F168813B8008E91DE /* result.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = result.pb.h; sourceTree = "<group>"; };
-		2D96346616881614008E91DE /* libboost_program_options-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_program_options-mt.a"; path = "../../../../opt/local/lib/libboost_program_options-mt.a"; sourceTree = "<group>"; };
-		2D96346716881614008E91DE /* libboost_regex-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_regex-mt.a"; path = "../../../../opt/local/lib/libboost_regex-mt.a"; sourceTree = "<group>"; };
-		2D96346816881614008E91DE /* libboost_system-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_system-mt.a"; path = "../../../../opt/local/lib/libboost_system-mt.a"; sourceTree = "<group>"; };
-		2D96346916881614008E91DE /* libboost_thread-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_thread-mt.a"; path = "../../../../opt/local/lib/libboost_thread-mt.a"; sourceTree = "<group>"; };
-		2D96346A16881614008E91DE /* libicudata.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicudata.a; path = ../../../../opt/local/lib/libicudata.a; sourceTree = "<group>"; };
-		2D96346B16881614008E91DE /* libicuuc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuuc.a; path = ../../../../opt/local/lib/libicuuc.a; sourceTree = "<group>"; };
-		2D96346C16881614008E91DE /* libprotobuf-lite.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libprotobuf-lite.a"; path = "../../../../opt/local/lib/libprotobuf-lite.a"; sourceTree = "<group>"; };
-		2D96347516881633008E91DE /* libprotobuf.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libprotobuf.a; path = ../../../../opt/local/lib/libprotobuf.a; sourceTree = "<group>"; };
-		2D9634771688164D008E91DE /* liblog4cplus.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblog4cplus.a; path = ../../../../opt/local/lib/liblog4cplus.a; sourceTree = "<group>"; };
-		2D9634791688165F008E91DE /* libboost_filesystem-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_filesystem-mt.a"; path = "../../../../opt/local/lib/libboost_filesystem-mt.a"; sourceTree = "<group>"; };
+		2D96346616881614008E91DE /* libboost_program_options-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_program_options-mt.a"; path = "../../../../usr/local/lib/libboost_program_options-mt.a"; sourceTree = "<group>"; };
+		2D96346716881614008E91DE /* libboost_regex-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_regex-mt.a"; path = "../../../../usr/local/lib/libboost_regex-mt.a"; sourceTree = "<group>"; };
+		2D96346816881614008E91DE /* libboost_system-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_system-mt.a"; path = "../../../../usr/local/lib/libboost_system-mt.a"; sourceTree = "<group>"; };
+		2D96346916881614008E91DE /* libboost_thread-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_thread-mt.a"; path = "../../../../usr/local/lib/libboost_thread-mt.a"; sourceTree = "<group>"; };
+		2D96346A16881614008E91DE /* libicudata.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicudata.a; path = ../../../../usr/local/lib/libicudata.a; sourceTree = "<group>"; };
+		2D96346B16881614008E91DE /* libicuuc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuuc.a; path = ../../../../usr/local/lib/libicuuc.a; sourceTree = "<group>"; };
+		2D96347516881633008E91DE /* libprotobuf.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libprotobuf.a; path = ../../../../usr/local/lib/libprotobuf.a; sourceTree = "<group>"; };
+		2D9634771688164D008E91DE /* liblog4cplus.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblog4cplus.a; path = ../../../../usr/local/lib/liblog4cplus.a; sourceTree = "<group>"; };
+		2D9634791688165F008E91DE /* libboost_filesystem-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_filesystem-mt.a"; path = "../../../../usr/local/lib/libboost_filesystem-mt.a"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -337,7 +336,6 @@
 				2D96346916881614008E91DE /* libboost_thread-mt.a */,
 				2D96346A16881614008E91DE /* libicudata.a */,
 				2D96346B16881614008E91DE /* libicuuc.a */,
-				2D96346C16881614008E91DE /* libprotobuf-lite.a */,
 				2D96334E16881090008E91DE /* CMakeLists.txt */,
 				2D96345D1688110F008E91DE /* docs */,
 				2D96334F16881090008E91DE /* CMakeModules */,
@@ -731,7 +729,7 @@
 		2D96332916881060008E91DE /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0450;
+				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = "Xu Chen";
 			};
 			buildConfigurationList = 2D96332C16881060008E91DE /* Build configuration list for PBXProject "Argos" */;
@@ -853,9 +851,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
@@ -874,8 +871,9 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/include",
-					/opt/local/include,
+					/usr/local/include,
 				);
+				ONLY_ACTIVE_ARCH = YES;
 				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
@@ -884,9 +882,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
@@ -899,7 +896,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/include",
-					/opt/local/include,
+					/usr/local/include,
 				);
 				VALID_ARCHS = x86_64;
 			};
@@ -908,11 +905,11 @@
 		2D96333D16881060008E91DE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++98";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LIBRARY = "libc++";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/opt/local/lib,
+					/usr/local/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -921,11 +918,11 @@
 		2D96333E16881060008E91DE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++98";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LIBRARY = "libc++";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/opt/local/lib,
+					/usr/local/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -936,7 +933,7 @@
 			buildSettings = {
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/opt/local/lib,
+					/usr/local/lib,
 				);
 				PRODUCT_NAME = indexer;
 			};
@@ -947,7 +944,7 @@
 			buildSettings = {
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/opt/local/lib,
+					/usr/local/lib,
 				);
 				PRODUCT_NAME = indexer;
 			};
