@@ -89,11 +89,19 @@ namespace argos {
             if (fi_.type_==common::FT_INVALID) {
                 return common::Value();
             }
+            // TODO: Something wrong here, disable field cache
+#ifdef TODO_USE_FIELD_CACHE
             if (did==cached_docid_) {
+                if (cached_value_.empty()) {
+                    return context.get_index()->get_doc_field(did, fid_);
+                }
                 return cached_value_;
             }
             cached_docid_=did;
             return cached_value_=context.get_index()->get_doc_field(did, fid_);
+#else
+            return context.get_index()->get_doc_field(did, fid_);
+#endif
         }
     }   // End of namespace index
 }   // End of namespace argos
