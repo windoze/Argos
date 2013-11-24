@@ -67,7 +67,7 @@ namespace http {
                     io::filtering_ostream out;
                     if(q.comp_) {
                         out.push(io::gzip_compressor());
-                        out.push(base_sst);
+                        out.push((std::ostream &)base_sst);
                         psst=&out;
                     }
                     
