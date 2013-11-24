@@ -43,7 +43,7 @@ Index *the_index=0;
 
 void close_index();
 
-bool init_index(const char *conf, const char *index_dir)
+bool init_index(const char *conf, const char *index_dir, bool quiet)
 {
     if (!(index_dir && index_dir[0])) {
         return false;
@@ -53,7 +53,7 @@ bool init_index(const char *conf, const char *index_dir)
         the_index=new Index(conf, index_dir, INDEX_CREATE);
         if(!the_index->is_open())
         {
-            cerr << "Cannot create index at \"" << index_dir << "\"\n";
+            if(!quiet) cerr << "Cannot create index at \"" << index_dir << "\"\n";
             close_index();
             the_index=0;
         }
@@ -62,7 +62,7 @@ bool init_index(const char *conf, const char *index_dir)
         the_index=new Index(index_dir);
         if(!the_index->is_open())
         {
-            cerr << "Cannot open index at \"" << index_dir << "\"\n";
+            if(!quiet) cerr << "Cannot open index at \"" << index_dir << "\"\n";
             close_index();
             the_index=0;
         }
@@ -96,7 +96,7 @@ void close_index()
     }
 }
 
-bool add_documents(istream &is, size_t &line_count, size_t &error_count)
+bool add_documents(istream &is, size_t &line_count, size_t &error_count, bool quiet)
 {
     string line;
     ExecutionContext *context=the_index->create_context();
@@ -111,21 +111,26 @@ bool add_documents(istream &is, size_t &line_count, size_t &error_count)
             context->temp_pool->reset();
         }
         if (!context) {
-            cerr << "ERROR: Fail to create context when processing line:" << line_count << endl;
+            if(!quiet) cerr << "ERROR: Fail to create context when processing line:" << line_count << endl;
             return false;
         }
         getline(is, line);
         if (line.empty()) {
-            error_count++;
+            if (is) {
+                error_count++;
+            } else {
+                // This is the last line with a CR/LF
+                line_count--;
+            }
             continue;
         }
         if(!add_document(line, *context))
         {
             error_count++;
-            cerr << "WARNING: Fail to add document at line:" << line_count+1 << endl;
+            if(!quiet) cerr << "WARNING: Fail to add document at line:" << line_count+1 << endl;
             continue;
         }
-        mark(line_count-1);
+        if(!quiet) mark(line_count-1);
     }
     if (context) {
         delete context;
@@ -133,13 +138,13 @@ bool add_documents(istream &is, size_t &line_count, size_t &error_count)
     return ret;
 }
 
-bool build_index(const string &conf, const string &index_dir, const string &inp, size_t &line_count, size_t &error_count)
+bool build_index(const string &conf, const string &index_dir, const string &inp, size_t &line_count, size_t &error_count, bool quiet)
 {
     if (inp=="-") {
-        if (!init_index(conf.c_str(), index_dir.c_str())) {
+        if (!init_index(conf.c_str(), index_dir.c_str(), quiet)) {
             return false;
         }
-        bool ret=add_documents(cin, line_count, error_count);
+        bool ret=add_documents(cin, line_count, error_count, quiet);
         close_index();
         return ret;
     } else {
@@ -147,10 +152,10 @@ bool build_index(const string &conf, const string &index_dir, const string &inp,
         if (!is) {
             return false;
         }
-        if (!init_index(conf.c_str(), index_dir.c_str())) {
+        if (!init_index(conf.c_str(), index_dir.c_str(), quiet)) {
             return false;
         }
-        bool ret=add_documents(is, line_count, error_count);
+        bool ret=add_documents(is, line_count, error_count, quiet);
         close_index();
         return ret;
     }
@@ -158,12 +163,18 @@ bool build_index(const string &conf, const string &index_dir, const string &inp,
 
 int main(int argc, const char * argv[])
 {
+    string conf;
+    string index_dir;
+    string inp;
+    bool quiet=false;
+
     po::options_description desc("Allowed options");
     desc.add_options()
     ("help", "produce help message")
-    ("config,c", po::value<string>(), "index config XML file")
-    ("index-dir,d", po::value<string>(), "index directory")
-    ("input-file,i", po::value<string>(), "input file")
+    ("config,c", po::value<string>(&conf), "index config XML file")
+    ("index-dir,d", po::value<string>(&index_dir), "index directory")
+    ("input-file,i", po::value<string>(&inp), "input file")
+    ("quiet,q", po::bool_switch(), "quiet mode, don't output progress and status")
     ;
     
     po::positional_options_description p;
@@ -182,52 +193,32 @@ int main(int argc, const char * argv[])
     
     if (vm.count("help")) {
         cout << desc << "\n";
-        return 1;
+        return 0;
     }
-    
-    string conf;
-    string index_dir;
-    string inp;
-    if (vm.count("config")) {
-        conf=vm["config"].as<string>();
-    }
-    
-    if (vm.count("index-dir")) {
-        index_dir=vm["index-dir"].as<string>();
-    } else {
-        cerr << "\nIndex path must be specified.\n";
-        return 100;
-    }
-    
-    if (vm.count("input-file")) {
-        inp=vm["input-file"].as<string>();
-    } else {
-        inp="-";
-    }
-    
+
     if (conf.empty()) {
-        cout << "Updating index at \"" << index_dir << "\"...\n";
+        if(!quiet) cout << "Updating index at \"" << index_dir << "\"...\n";
     } else {
-        cout << "Building index at \"" << index_dir << "\"...\n";
+        if(!quiet) cout << "Building index at \"" << index_dir << "\"...\n";
     }
     
     size_t line_count=0;
     size_t error_count=0;
     try {
-        if(!build_index(conf, index_dir, inp, line_count, error_count))
+        if(!build_index(conf, index_dir, inp, line_count, error_count, quiet))
         {
-            cerr << "\nFailed.\n";
-            return 100;
+            if(!quiet) cerr << "\nFailed.\n";
         }
-        cout << "\nDone.\n";
-        cout << line_count << " lines processed, " << error_count << " lines with error\n";
-        return 0;
+        if(!quiet) cout << "\nDone.\n";
+        if(!quiet) cout << line_count << " lines processed, " << error_count << " lines with error\n";
     }
     catch(exception &e) {
-        cerr << "\nERROR: " << e.what() << "\n";
+        if(!quiet) cerr << "\nERROR: " << e.what() << "\n";
+        return -1;
     }
     catch(...) {
-        cerr << "\nERROR: Uncaught exception.\n";
+        if(!quiet) cerr << "\nERROR: Uncaught exception.\n";
+        return -2;
     }
-    return 100;
+    return error_count;
 }

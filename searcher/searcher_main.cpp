@@ -80,15 +80,22 @@ void start_server(const vector<string> &index_dirs, const char *addr, const char
 
 int main(int argc, const char * argv[])
 {
+    vector<string> index_dirs;
+    string addr;
+    string port;
+    string doc_root;
+    string log_config;
+    int thr;
+    
     po::options_description desc("Allowed options");
     desc.add_options()
     ("help", "produce help message")
-    ("index-dir,d", po::value< vector<string> >(), "index directory")
-    ("listen-addr,a", po::value<string>(), "listening address")
-    ("listen-port,p", po::value<string>(), "listening port")
-    ("doc-root,r", po::value<string>(), "root directory for static files")
-    ("threads,t", po::value<int>(), "number of serving threads")
-    ("log-config,l", po::value<string>(), "log configuration file")
+    ("index-dir,d", po::value< vector<string> >(&index_dirs), "index directory")
+    ("listen-addr,a", po::value<string>(&addr)->default_value("0.0.0.0"), "listening address")
+    ("listen-port,p", po::value<string>(&port)->default_value("8765"), "listening port")
+    ("doc-root,r", po::value<string>(&doc_root)->default_value("./www"), "root directory for static files")
+    ("threads,t", po::value<int>(&thr)->default_value(3), "number of serving threads")
+    ("log-config,l", po::value<string>(&log_config), "log configuration file")
     ;
     
     po::variables_map vm;
@@ -103,20 +110,10 @@ int main(int argc, const char * argv[])
     
     if (vm.count("help")) {
         cout << desc << "\n";
-        return 1;
+        return 0;
     }
     
-    vector<string> index_dirs;
-    string addr;
-    string port;
-    string doc_root;
-    string log_config;
-    int thr;
-
-    if (vm.count("log-config")) {
-        log_config=vm["log-config"].as<string>();
-    }
-    
+    Logger logger = Logger::getInstance("main");
     if (log_config.empty()) {
         BasicConfigurator config;
         config.configure();
@@ -124,53 +121,21 @@ int main(int argc, const char * argv[])
         PropertyConfigurator config(log_config);
         config.configure();
     }
-    Logger logger = Logger::getInstance("main");
     char cwd[1024];
-    LOG4CPLUS_INFO(logger, "Searcher start running at " << getcwd(cwd, 1024));
+    LOG4CPLUS_INFO(logger, "Searcher running at " << getcwd(cwd, 1024));
     for (int i=0; i<argc; i++) {
         LOG4CPLUS_DEBUG(logger, "Command line option: " << argv[i]);
     }
-    
     if (log_config.empty()) {
         LOG4CPLUS_DEBUG(logger, "Using empty log config");
     } else {
         LOG4CPLUS_DEBUG(logger, "Using log config " << log_config);
     }
-    
-    if (vm.count("index-dir")) {
-        index_dirs=vm["index-dir"].as<vector<string> >();
-    }
     for(size_t i=0; i<index_dirs.size(); i++) {
         LOG4CPLUS_DEBUG(logger, "Using index at " << index_dirs[i]);
     }
-    
-    if (vm.count("listen-addr")) {
-        addr=vm["listen-addr"].as<string>();
-    } else {
-        // addr="0::0"; // For IPv6
-        addr="0.0.0.0";
-    }
-    
-    if (vm.count("listen-port")) {
-        port=vm["listen-port"].as<string>();
-    } else {
-        port="8765";
-    }
     LOG4CPLUS_DEBUG(logger, "Listening at " << addr << ':' << port);
-    
-    if (vm.count("doc-root")) {
-        doc_root=vm["doc-root"].as<string>();
-    } else {
-        doc_root="./www";
-    }
     LOG4CPLUS_DEBUG(logger, "Document root at " << doc_root);
-    
-    if (vm.count("threads")) {
-        thr=vm["threads"].as<int>();
-    } else {
-        thr=3;
-    }
-    LOG4CPLUS_DEBUG(logger, "Server threads " << thr);
     
     start_server(index_dirs,
                  addr.c_str(),
