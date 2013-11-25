@@ -49,7 +49,14 @@ namespace http {
                 
                 if (result)
                 {
-                    request_.peer=socket().remote_endpoint().address().to_string();
+                    boost::system::error_code ec;
+                    boost::asio::ip::tcp::socket::endpoint_type ep=socket().remote_endpoint(ec);
+                    if (ec) {
+                        // Something wrong, maybe client disconnected before retrieving endpoint address
+                        request_.peer="UNKNOWN";
+                    } else {
+                        request_.peer=ep.address().to_string();
+                    }
                     request_handler_.handle_request(request_, reply_);
                     boost::asio::async_write(socket_, reply_.to_buffers(),
                                              strand_.wrap(
