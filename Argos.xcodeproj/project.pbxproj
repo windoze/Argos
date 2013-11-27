@@ -284,8 +284,8 @@
 		2D96346716881614008E91DE /* libboost_regex-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_regex-mt.a"; path = "/usr/local/lib/libboost_regex-mt.a"; sourceTree = "<group>"; };
 		2D96346816881614008E91DE /* libboost_system-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_system-mt.a"; path = "/usr/local/lib/libboost_system-mt.a"; sourceTree = "<group>"; };
 		2D96346916881614008E91DE /* libboost_thread-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_thread-mt.a"; path = "/usr/local/lib/libboost_thread-mt.a"; sourceTree = "<group>"; };
-		2D96346A16881614008E91DE /* libicudata.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicudata.a; path = /usr/local/lib/libicudata.a; sourceTree = "<group>"; };
-		2D96346B16881614008E91DE /* libicuuc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuuc.a; path = /usr/local/lib/libicuuc.a; sourceTree = "<group>"; };
+		2D96346A16881614008E91DE /* libicudata.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicudata.a; path = /usr/local/opt/icu4c/lib/libicudata.a; sourceTree = "<group>"; };
+		2D96346B16881614008E91DE /* libicuuc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuuc.a; path = /usr/local/opt/icu4c/lib/libicuuc.a; sourceTree = "<group>"; };
 		2D96347516881633008E91DE /* libprotobuf.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libprotobuf.a; path = /usr/local/lib/libprotobuf.a; sourceTree = "<group>"; };
 		2D9634771688164D008E91DE /* liblog4cplus.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblog4cplus.a; path = /usr/local/lib/liblog4cplus.a; sourceTree = "<group>"; };
 		2D9634791688165F008E91DE /* libboost_filesystem-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_filesystem-mt.a"; path = "/usr/local/lib/libboost_filesystem-mt.a"; sourceTree = "<group>"; };
@@ -872,7 +872,9 @@
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/include",
 					/usr/local/include,
+					/usr/local/opt/icu4c/include,
 				);
+				LIBRARY_SEARCH_PATHS = /usr/local/opt/icu4c/lib;
 				ONLY_ACTIVE_ARCH = YES;
 				VALID_ARCHS = x86_64;
 			};
@@ -897,7 +899,9 @@
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/include",
 					/usr/local/include,
+					/usr/local/opt/icu4c/include,
 				);
+				LIBRARY_SEARCH_PATHS = /usr/local/opt/icu4c/lib;
 				VALID_ARCHS = x86_64;
 			};
 			name = Release;
